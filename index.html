@@ -457,6 +457,17 @@ textarea.inp{resize:vertical;min-height:66px;}
 @keyframes sab-fadein{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
 .sab-anim{opacity:0;animation:sab-fadein .5s ease forwards;animation-delay:var(--sab-delay,0s);}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const SUPABASE_URL = 'https://xugnhsgtbxfhrogsmrdw.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_pOQI42PvxWHHWH_qcckMuQ_kmkkOxOK';
+
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+</script>
 </head>
 <body>
 <!-- LOADING SCREEN -->
@@ -1085,61 +1096,201 @@ function go(id){
  var s=document.getElementById(id);if(s)s.classList.add('on');
  if(id==='sp')lpf();
  if(id==='sh'){rhs();if(typeof updateHomeStats==='function')updateHomeStats();if(typeof updateAllUserBadges==='function')updateAllUserBadges();}
- if(id==='sa'){if(typeof updateAllUserBadges==='function')updateAllUserBadges();}
+ if(id==='sa'){
+ CT='night';
+ document.body.removeAttribute('data-theme');
+
+ if(typeof updateAllUserBadges==='function'){
+  updateAllUserBadges();
+ }
+}
  if(id==='srk')rkload();
  if(id==='sst')stload();
  if(id==='sres'){};
 }
-function rkload(){
- var ul=gu().slice().sort(function(a,b){return(b.best||0)-(a.best||0);}).slice(0,10);
- var el=document.getElementById('rklist');if(!el)return;
- var me=gc();
- var myEmail=me?me.email:null;
- if(!ul.length){
-  el.innerHTML=[
-   '<div style="display:flex;flex-direction:column;align-items:center;gap:1rem;padding:2.5rem 1rem;text-align:center">',
-   '<div style="font-size:2.5rem">&#127942;</div>',
-   '<div style="font-size:.88rem;font-weight:700;color:var(--text)">Ranking vazio por enquanto!</div>',
-   '<div style="font-size:.72rem;color:var(--muted);max-width:260px;line-height:1.7">Nenhum jogador no ranking ainda. Termine uma partida para entrar na lista e disputar o 1º lugar!</div>',
-   '<button class="btn bp" style="font-size:.72rem;padding:.45rem 1.2rem" onclick="startq()">&#9654; Jogar agora</button>',
-   '</div>'
-  ].join('');
-  return;
+async function rkload(){
+
+ var el=document.getElementById('rklist');
+ if(!el)return;
+
+ try{
+
+  /* Busca os 10 maiores recordes no Supabase */
+  var {data:scores,error:scoresError}=await supabaseClient
+   .from('scores')
+   .select('user_id,pontuacao_maxima')
+   .order('pontuacao_maxima',{ascending:false})
+   .limit(10);
+
+  if(scoresError){
+   console.error('Erro ao carregar ranking:',scoresError);
+   el.innerHTML=
+    '<div style="padding:2rem;text-align:center;color:var(--muted);">'+
+    'Não foi possível carregar o ranking.'+
+    '</div>';
+   return;
+  }
+
+  if(!scores||!scores.length){
+   el.innerHTML=[
+    '<div style="display:flex;flex-direction:column;align-items:center;gap:1rem;padding:2.5rem 1rem;text-align:center">',
+    '<div style="font-size:2.5rem">&#127942;</div>',
+    '<div style="font-size:.88rem;font-weight:700;color:var(--text)">Ranking vazio por enquanto!</div>',
+    '<div style="font-size:.72rem;color:var(--muted);max-width:260px;line-height:1.7">Nenhum jogador no ranking ainda. Termine uma partida para entrar na lista e disputar o 1º lugar!</div>',
+    '<button class="btn bp" style="font-size:.72rem;padding:.45rem 1.2rem" onclick="startq()">&#9654; Jogar agora</button>',
+    '</div>'
+   ].join('');
+   return;
+  }
+
+  /* Busca os perfis correspondentes aos jogadores */
+  var ids=scores.map(function(s){return s.user_id;});
+
+  var {data:profiles,error:profilesError}=await supabaseClient
+   .from('profiles')
+   .select('id,username,name,title,turma,photo')
+   .in('id',ids);
+
+  if(profilesError){
+   console.error('Erro ao carregar perfis do ranking:',profilesError);
+   return;
+  }
+
+  profiles=profiles||[];
+
+  /* Junta score + perfil */
+  var players=scores.map(function(s){
+
+   var p=profiles.find(function(profile){
+    return profile.id===s.user_id;
+   });
+
+   return {
+    id:s.user_id,
+    username:p?(p.username||p.name||'Usuário'):'Usuário',
+    title:p?(p.title||''):'',
+    turma:p?(p.turma||''):'',
+    photo:p?(p.photo||''):'',
+    best:s.pontuacao_maxima||0
+   };
+
+  });
+
+  var me=gc();
+  var myId=me?me.id:null;
+
+  var top1=players[0]?players[0].best:1;
+
+  var medals=['&#127942;','&#129352;','&#129353;'];
+  var crowns=['&#128081;','&#128081;','&#128081;'];
+  var cls=['gold','silver','bronze'];
+
+  var myPos=players.findIndex(function(p){
+   return p.id===myId;
+  });
+
+  var html='';
+
+  html+='<div style="font-size:.72rem;color:var(--muted);text-align:center;padding:.5rem 0 .8rem;line-height:1.7">&#127942; Estes são os mestres das redes.<br>Será que você será o próximo?</div>';
+
+  players.forEach(function(u,i){
+
+   var isMe=u.id===myId;
+
+   var rc=i<3?' '+cls[i]:'';
+   if(isMe)rc+=' me';
+
+   var av=u.photo
+    ?'<img src="'+u.photo+'" alt="">'
+    :'&#128100;';
+
+   var meta=(u.title||'')+
+    (u.title&&u.turma?' &middot; ':' ')+
+    (u.turma||'');
+
+   var crown=i<3
+    ?'<span class="rk-crown">'+crowns[i]+'</span> '
+    :'';
+
+   var medal=i<3
+    ?medals[i]
+    :'#'+(i+1);
+
+   var barPct=top1>0
+    ?Math.round((u.best/top1)*100)
+    :0;
+
+   var barColor=i===0
+    ?'var(--wn)'
+    :i===1
+     ?'var(--muted)'
+     :i===2
+      ?'#cd7f32'
+      :'var(--ac)';
+
+   html+='<div class="rkrow'+rc+'" style="flex-direction:column;gap:.3rem;animation:sIn .3s '+(i*.06)+'s both">';
+
+   html+='<div style="display:flex;align-items:center;gap:.7rem;width:100%">';
+
+   html+='<div class="rkpos">'+medal+'</div>';
+
+   html+='<div class="rkav">'+av+'</div>';
+
+   html+='<div class="rkinfo">';
+   html+='<div class="rkname">'+
+    crown+
+    (u.username||'?')+
+    (isMe?' <span style="font-size:.55rem;color:var(--ac);">(você)</span>':'')+
+    '</div>';
+
+   html+='<div class="rkmeta">'+
+    (meta.trim()||'&mdash;')+
+    '</div>';
+
+   html+='</div>';
+
+   html+='<div class="rkscore">'+u.best+'</div>';
+
+   html+='</div>';
+
+   html+='<div class="rk-bar">';
+   html+='<div class="rk-bar-fill" style="width:'+barPct+'%;background:'+barColor+'"></div>';
+   html+='</div>';
+
+   html+='</div>';
+
+  });
+
+  /* Mensagem da posição do usuário */
+  if(myPos===-1&&myId){
+
+   html+='<div style="margin-top:.8rem;padding:.6rem .9rem;background:var(--surface);border:1px solid var(--ac);border-radius:var(--r);font-size:.7rem;color:var(--ac);text-align:center">'+
+   'Você ainda não está no ranking. Termine uma partida para entrar!'+
+   '</div>';
+
+  }else if(myPos>0){
+
+   var needed=(players[myPos-1].best||0)-(players[myPos].best||0)+1;
+
+   html+='<div style="margin-top:.8rem;padding:.6rem .9rem;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);font-size:.7rem;color:var(--muted);text-align:center">'+
+   'Sua posição: <strong style="color:var(--ac)">#'+(myPos+1)+'</strong> &mdash; Você precisa de <strong style="color:var(--wn)">'+needed+' pontos</strong> para subir!'+
+   '</div>';
+
+  }
+
+  el.innerHTML=html;
+
+ }catch(err){
+
+  console.error('Erro inesperado no ranking:',err);
+
+  el.innerHTML=
+   '<div style="padding:2rem;text-align:center;color:var(--muted);">'+
+   'Erro ao carregar o ranking.'+
+   '</div>';
+
  }
- var top1=ul[0]?ul[0].best||0:1;
- var medals=['&#127942;','&#129352;','&#129353;'];
- var crowns=['&#128081;','&#128081;','&#128081;'];
- var cls=['gold','silver','bronze'];
- var myPos=ul.findIndex(function(u){return u.email===myEmail;});
- var html='';
- html+='<div style="font-size:.72rem;color:var(--muted);text-align:center;padding:.5rem 0 .8rem;line-height:1.7">&#127942; Estes são os mestres das redes.<br>Será que você será o próximo?</div>';
- ul.forEach(function(u,i){
-  var isMe=u.email===myEmail;
-  var rc=i<3?' '+cls[i]:'';
-  if(isMe)rc+=' me';
-  var av=u.photo?'<img src="'+u.photo+'" alt="">':'&#128100;';
-  var meta=(u.title||'')+(u.title&&u.turma?' &middot; ':' ')+(u.turma||'');
-  var crown=i<3?'<span class="rk-crown">'+crowns[i]+'</span> ':'';
-  var medal=i<3?medals[i]:'#'+(i+1);
-  var barPct=top1>0?Math.round((u.best||0)/top1*100):0;
-  var barColor=i===0?'var(--wn)':i===1?'var(--muted)':i===2?'#cd7f32':'var(--ac)';
-  html+='<div class="rkrow'+rc+'" style="flex-direction:column;gap:.3rem;animation:sIn .3s '+(i*.06)+'s both">';
-  html+='<div style="display:flex;align-items:center;gap:.7rem;width:100%">';
-  html+='<div class="rkpos">'+medal+'</div>';
-  html+='<div class="rkav">'+av+'</div>';
-  html+='<div class="rkinfo"><div class="rkname">'+crown+(u.username||'?')+(isMe?' <span style="font-size:.55rem;color:var(--ac);">(você)</span>':'')+'</div><div class="rkmeta">'+(meta.trim()||'&mdash;')+'</div></div>';
-  html+='<div class="rkscore">'+(u.best||0)+'</div>';
-  html+='</div>';
-  html+='<div class="rk-bar"><div class="rk-bar-fill" style="width:'+barPct+'%;background:'+barColor+'"></div></div>';
-  html+='</div>';
- });
- if(myPos===-1&&me){
-  html+='<div style="margin-top:.8rem;padding:.6rem .9rem;background:var(--surface);border:1px solid var(--ac);border-radius:var(--r);font-size:.7rem;color:var(--ac);text-align:center">Você ainda não está no ranking. Jogue para entrar!</div>';
- }else if(myPos>0&&me){
-  var needed=(ul[myPos-1].best||0)-(me.best||0)+1;
-  html+='<div style="margin-top:.8rem;padding:.6rem .9rem;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);font-size:.7rem;color:var(--muted);text-align:center">Sua posição: <strong style="color:var(--ac)">#'+(myPos+1)+'</strong> &mdash; Você precisa de <strong style="color:var(--wn)">'+needed+' pontos</strong> para subir!</div>';
- }
- el.innerHTML=html;
+
 }
 var ST_V4=[
 {i:'&#128290;',t:'1. Fundamentos do IPv4',b:'<span class="badge-v4">IPv4</span><br>Um endereço IPv4 tem <strong>32 bits</strong> divididos em 4 octetos separados por ponto.<br><div class="ex">192  .  168  .   1   .  100<br>11000000.10101000.00000001.01100100</div><strong>Tabela de potências de 2 (por bit):</strong><br><table class="stbl"><tr><th>Bit</th><th>7</th><th>6</th><th>5</th><th>4</th><th>3</th><th>2</th><th>1</th><th>0</th></tr><tr><td>Valor</td><td>128</td><td>64</td><td>32</td><td>16</td><td>8</td><td>4</td><td>2</td><td>1</td></tr></table><strong>Conversão decimal &rarr; binário:</strong> subtraia as potências de 2 da maior para a menor.<br><div class="ex">192 = 128+64 = 11000000<br>168 = 128+32+8 = 10101000<br>100 = 64+32+4 = 01100100</div>'},
@@ -1453,29 +1604,207 @@ function pwstr(pw){
 function se(id,msg){var el=document.getElementById(id);if(el)el.textContent=msg;}
 function ce(ids){ids.forEach(function(id){se(id,'');});}
 function vem(e){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);}
-function dologin(){
+async function dologin(){
  ce(['lue','lpe']);
- var u=document.getElementById('lu').value.trim(),p=document.getElementById('lp').value,ok=true;
- if(!u){se('lue',t('e_req'));ok=false;}
- if(!p){se('lpe',t('e_req'));ok=false;}
+
+ var u=document.getElementById('lu').value.trim();
+ var p=document.getElementById('lp').value;
+ var ok=true;
+
+ if(!u){
+  se('lue',t('e_req'));
+  ok=false;
+ }
+
+ if(!p){
+  se('lpe',t('e_req'));
+  ok=false;
+ }
+
  if(!ok)return;
- var found=gu().find(function(x){return(x.username===u||x.email===u)&&x.password===p;});
- if(!found){se('lpe',t('e_login'));return;}
- login(found);
+
+ try{
+
+  var emailLogin=u;
+
+  /* Se digitou username, procura o e-mail no Supabase */
+  if(!vem(u)){
+   var {data:foundEmail,error:usernameError}=await supabaseClient
+    .rpc('get_login_email',{p_username:u});
+
+   if(usernameError){
+    console.error(usernameError);
+    se('lue','Erro ao procurar o usuário.');
+    return;
+   }
+
+   if(!foundEmail){
+    se('lue','Usuário ou e-mail não encontrado.');
+    return;
+   }
+
+   emailLogin=foundEmail;
+  }
+
+  /* Login pelo Supabase */
+  var {data,error}=await supabaseClient.auth.signInWithPassword({
+   email:emailLogin,
+   password:p
+  });
+
+  if(error){
+   console.error(error);
+   se('lpe','Usuário/e-mail ou senha incorretos.');
+   return;
+  }
+
+  if(!data.user){
+   se('lpe','Não foi possível entrar na conta.');
+   return;
+  }
+
+  /* Busca os dados ATUAIS do perfil */
+  var {data:profile,error:profileError}=await supabaseClient
+   .from('profiles')
+   .select('*')
+   .eq('id',data.user.id)
+   .single();
+
+  if(profileError){
+   console.error(profileError);
+   se('lpe','Login realizado, mas não foi possível carregar seu perfil.');
+   return;
+  }
+
+  /* Monta o usuário usando os dados do Supabase */
+  var nu={
+   id:data.user.id,
+   username:profile.username||profile.name||'Usuário',
+   email:profile.email||data.user.email,
+   bio:profile.bio||'',
+   title:profile.title||'',
+   turma:profile.turma||'',
+   photo:profile.photo||'',
+   pp:{
+    x:profile.pp_x||0,
+    y:profile.pp_y||0
+   },
+   pz:profile.pz||1,
+   theme:profile.theme||'night',
+   language:profile.language||'pt',
+   best:0,
+   score:0
+  };
+
+  /* Atualiza também as variáveis da foto */
+  PS=nu.photo;
+  PP=nu.pp;
+  PZ=nu.pz;
+
+  /* Salva uma cópia local atualizada */
+  sc(nu);
+
+  /* Entra na conta */
+  login(nu);
+
+ }catch(err){
+  console.error(err);
+  se('lpe','Erro ao fazer login.');
+ }
 }
-function doreg(){
+async function doreg(){
  ce(['rne','ree','rpe','rp2e']);
- var n=document.getElementById('rn').value.trim(),e=document.getElementById('re').value.trim();
- var p=document.getElementById('rp').value,p2=document.getElementById('rp2').value,ok=true;
- if(n.length<3){se('rne',t('e_uname'));ok=false;}
- if(!vem(e)){se('ree',t('e_email'));ok=false;}
- if(p.length<6){se('rpe',t('e_pshort'));ok=false;}
- if(p!==p2){se('rp2e',t('e_pmatch'));ok=false;}
+
+ var n=document.getElementById('rn').value.trim();
+ var e=document.getElementById('re').value.trim();
+ var p=document.getElementById('rp').value;
+ var p2=document.getElementById('rp2').value;
+ var ok=true;
+
+ if(n.length<3){
+  se('rne',t('e_uname'));
+  ok=false;
+ }
+
+ if(!vem(e)){
+  se('ree',t('e_email'));
+  ok=false;
+ }
+
+ if(p.length<6){
+  se('rpe',t('e_pshort'));
+  ok=false;
+ }
+
+ if(p!==p2){
+  se('rp2e',t('e_pmatch'));
+  ok=false;
+ }
+
  if(!ok)return;
- var us=gu();
- if(us.find(function(x){return x.email===e||x.username===n;})){se('ree',t('e_exists'));return;}
- var nu={username:n,email:e,password:p,bio:'',title:'',turma:'',photo:'',pp:{x:0,y:0},pz:1,theme:'night',language:'pt',best:0,score:0};
- us.push(nu);su(us);login(nu);
+
+ try{
+  var {data,error}=await supabaseClient.auth.signUp({
+ email:e,
+ password:p,
+ options:{
+  data:{
+   name:n,
+   username:n
+  }
+ }
+});
+
+  if(error){
+   se('ree',error.message);
+   return;
+  }
+
+  if(!data.user){
+   se('ree','Não foi possível criar a conta.');
+   return;
+  }
+
+  if(data.session){
+   var {error:profileError}=await supabaseClient
+    .from('profiles')
+    .insert({
+      id:data.user.id,
+      name:n,
+      email:e,
+      turma:''
+    });
+
+   if(profileError){
+    console.error(profileError);
+    se('ree','Conta criada, mas houve um erro ao salvar o perfil.');
+    return;
+   }
+
+   var nu={
+    username:n,
+    email:e,
+    bio:'',
+    title:'',
+    turma:'',
+    photo:'',
+    pp:{x:0,y:0},
+    pz:1,
+    theme:'night',
+    language:'pt',
+    best:0,
+    score:0
+   };
+
+   login(nu);
+  }else{
+   se('ree','Conta criada! Verifique seu e-mail para confirmar a conta.');
+  }
+
+ }catch(err){
+  console.error(err);
+  se('ree','Erro ao criar a conta.');
+ }
 }
 function dogoogle(){
  var el=document.getElementById('mgoog');
@@ -1501,7 +1830,23 @@ function login(u){
  stheme(u.theme||'night');i18n();uhdr();rhs();
  go('sh');ipart('hc');
 }
-function logout(){sc(null);go('sa');ipart('pc');}
+async function logout(){
+ try{
+  var {error}=await supabaseClient.auth.signOut();
+
+  if(error){
+   console.error('Erro ao sair:',error);
+   return;
+  }
+
+  sc(null);
+  go('sa');
+  ipart('pc');
+
+ }catch(err){
+  console.error('Erro ao sair:',err);
+ }
+}
 (function(){
  try{
   if(typeof emailjs!=='undefined')emailjs.init('YOUR_PUBLIC_KEY');
@@ -1609,17 +1954,63 @@ function upf(){
 }
 function mp(dx,dy){PP.x+=dx;PP.y+=dy;rpp();}
 function cfr(){toast(t('t_photo'),'gd');tpp();}
-function savep(){
- var u=gc();if(!u)return;
- u.username=document.getElementById('pname').value.trim()||u.username;
- u.bio=document.getElementById('pbio').value;
- u.title=document.getElementById('ptit').value.trim();
- u.turma=document.getElementById('ptur').value.trim();
- u.photo=PS;u.pp=PP;u.pz=PZ;
- sc(u);
- var us=gu(),i=us.findIndex(function(x){return x.email===u.email;});
- if(i>-1){us[i]=u;su(us);}
- uhdr();toast(t('t_saved'),'gd');
+async function savep(){
+  var u=gc();
+  if(!u)return;
+
+  var newUsername=document.getElementById('pname').value.trim()||u.username;
+  var newBio=document.getElementById('pbio').value;
+  var newTitle=document.getElementById('ptit').value.trim();
+  var newTurma=document.getElementById('ptur').value.trim();
+
+  try{
+    var {data:updatedProfile,error}=await supabaseClient
+      .from('profiles')
+      .update({
+        username:newUsername,
+        name:newUsername,
+        bio:newBio,
+        title:newTitle,
+        turma:newTurma,
+        photo:PS,
+        pp_x:PP.x,
+        pp_y:PP.y,
+        pz:PZ,
+        theme:CT||'night',
+        language:L||'pt'
+      })
+      .eq('id',u.id)
+      .select()
+      .single();
+
+    if(error){
+      console.error(error);
+      toast('Não foi possível salvar o perfil.','bd');
+      return;
+    }
+
+    u.username=updatedProfile.username||newUsername;
+    u.bio=updatedProfile.bio||'';
+    u.title=updatedProfile.title||'';
+    u.turma=updatedProfile.turma||'';
+    u.photo=updatedProfile.photo||'';
+    u.pp={
+      x:updatedProfile.pp_x||0,
+      y:updatedProfile.pp_y||0
+    };
+    u.pz=updatedProfile.pz||1;
+    u.theme=updatedProfile.theme||'night';
+    u.language=updatedProfile.language||'pt';
+
+    sc(u);
+
+    uhdr();
+    toast(t('t_saved'),'gd');
+
+  }catch(err){
+    console.error(err);
+    toast('Erro ao salvar o perfil.','bd');
+  }
 }
 // NETWORK MATH
 function i2i(ip){var p=ip.split('.').map(Number);return((p[0]<<24)|(p[1]<<16)|(p[2]<<8)|p[3])>>>0;}
@@ -3352,7 +3743,11 @@ var QT=[
  {id:'fh',badge:function(){return t('b_fh');},text:function(n){return t('q_fh').replace('%N%',n.net).replace('%C%',n.cidr);},ans:function(n){return n.fh;},hint:function(){return t('h_ip');},chk:function(i,n){return nip(i)===n.fh;}},
  {id:'lh',badge:function(){return t('b_lh');},text:function(n){return t('q_lh').replace('%N%',n.net).replace('%C%',n.cidr);},ans:function(n){return n.lh;},hint:function(){return t('h_ip');},chk:function(i,n){return nip(i)===n.lh;}}
 ];
-var QS={sc:0,qn:0,tot:0,hits:0,ts:60,tmax:60,ti:null,ans:false,net:null,tp:null,li:-1,dbi:-1,mode:'dyn'};
+var QS={
+ sc:0,qn:0,tot:0,hits:0,ts:60,tmax:60,ti:null,
+ ans:false,net:null,tp:null,li:-1,dbi:-1,mode:'dyn',
+ usedCombos:{}
+};
 function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
 var _dbOrder=[];
 /* Classifica cada pergunta do QUIZ_DB como 'v4', 'v6' ou 'both' em runtime */
@@ -3386,6 +3781,7 @@ function _buildDbOrder(mode){
 }
 function startq(){
  QS.sc=0;QS.qn=0;QS.tot=0;QS.hits=0;
+ QS.usedCombos={};
  _dbOrder=_buildDbOrder(QUIZ_MODE||'v4');
  QS.dbi=-1;
  _combo=0;var cb=document.getElementById('combo-banner');if(cb)cb.classList.remove('on');
@@ -3395,25 +3791,91 @@ function startq(){
 function stopq(){
  clearInterval(QS.ti);
  document.getElementById('fov').classList.remove('on');
- if(QS.qn>0){showResult();}else{_saveScore();go('sh');}
+ if(QS.qn>0){showResult();}else{go('sh');}
 }
-function _saveScore(){
+async function _saveScore(isError){
  var u=gc();
- if(u){
-  /* Só atualiza o recorde (ranking) se o modo for 'both' */
-  var isBoth=(QUIZ_MODE==='both');
-  var isRec=isBoth&&(QS.sc>u.best);
-  u.score=QS.sc;
-  if(isRec)u.best=QS.sc;
-  sc(u);
-  if(isBoth){
-   /* Só persiste no ranking global se jogou com Ambos */
-   var us=gu(),i=us.findIndex(function(x){return x.email===u.email;});
-   if(i>-1){us[i]=u;su(us);}
-  }
-  return isRec;
+
+ if(!u || !u.id || QUIZ_MODE!=='both'){
+  return false;
  }
- return false;
+
+ var isRec=QS.sc>0;
+
+ try{
+
+  /* Procura o registro desse usuário */
+  var {data:row,error:selectError}=await supabaseClient
+   .from('scores')
+   .select('*')
+   .eq('user_id',u.id)
+   .maybeSingle();
+
+  if(selectError){
+   console.error('Erro ao buscar estatísticas:',selectError);
+   return false;
+  }
+
+  /* Se ainda não existir, cria */
+  if(!row){
+
+   var {data:newRow,error:insertError}=await supabaseClient
+    .from('scores')
+    .insert({
+     user_id:u.id,
+     partidas:1,
+     acertos:QS.hits,
+     erros:isError?1:0,
+     pontuacao_maxima:QS.sc
+    })
+    .select()
+    .single();
+
+   if(insertError){
+    console.error('Erro ao criar estatísticas:',insertError);
+    return false;
+   }
+
+   row=newRow;
+
+  }else{
+
+   isRec=QS.sc>(row.pontuacao_maxima||0);
+
+   var {error:updateError}=await supabaseClient
+    .from('scores')
+    .update({
+     partidas:(row.partidas||0)+1,
+     acertos:(row.acertos||0)+QS.hits,
+     erros:(row.erros||0)+(isError?1:0),
+     pontuacao_maxima:isRec?QS.sc:(row.pontuacao_maxima||0)
+    })
+    .eq('user_id',u.id);
+
+   if(updateError){
+    console.error('Erro ao atualizar estatísticas:',updateError);
+    return false;
+   }
+  }
+
+  /* Mantém o recorde disponível para a interface local */
+  if(isRec || QS.sc>(u.best||0)){
+   u.best=QS.sc;
+  }
+
+  u.score=QS.sc;
+  sc(u);
+
+  console.log('Estatísticas salvas no Supabase.');
+
+  return isRec;
+
+ }catch(err){
+
+  console.error('Erro ao salvar estatísticas:',err);
+  return false;
+
+ }
 }
 function _pickNext(){
  var mode=QUIZ_MODE||'v4';
@@ -3436,14 +3898,48 @@ function _pickNext(){
   else{QS.mode='db';}
  }
  if(QS.mode==='dyn'){
+
+ var attempts=0;
+ var combo;
+
+ do{
+
   QS.net=rnet();
-  var idx;do{idx=rnd(0,QT.length-1);}while(idx===QS.li&&QT.length>1);
-  QS.li=idx;QS.tp=QT[idx];
- }else if(QS.mode==='v6'){
+
+  var idx=rnd(0,QT.length-1);
+  QS.li=idx;
+  QS.tp=QT[idx];
+
+  combo=QS.net.net+'/'+QS.net.cidr+'|'+QS.tp.id;
+
+  attempts++;
+
+ }while(QS.usedCombos[combo]&&attempts<100);
+
+ QS.usedCombos[combo]=true;
+
+}else if(QS.mode==='v6'){
+
+ var attempts6=0;
+ var combo6;
+
+ do{
+
   QS.net6=rnet6();
-  var idx6;do{idx6=rnd(0,QT6.length-1);}while(idx6===QS.li6&&QT6.length>1);
-  QS.li6=idx6;QS.tp6=QT6[idx6];
- }else{
+
+  var idx6=rnd(0,QT6.length-1);
+  QS.li6=idx6;
+  QS.tp6=QT6[idx6];
+
+  combo6=QS.net6.v6addr+'|'+QS.tp6.id;
+
+  attempts6++;
+
+ }while(QS.usedCombos[combo6]&&attempts6<100);
+
+ QS.usedCombos[combo6]=true;
+
+}else{
   QS.dbi=(QS.dbi+1)%_dbOrder.length;
   if(QS.dbi===0)_dbOrder=shuffle(_dbOrder);
   QS.dbq=QUIZ_DB[_dbOrder[QS.dbi]];
@@ -3603,7 +4099,7 @@ function utui(){
  if(fg){var circ=2*Math.PI*18,off=circ*(1-pct/100);fg.style.strokeDashoffset=off;fg.style.stroke=col;}
  var pl=document.getElementById('qprog-lbl');if(pl)pl.textContent='Questão #'+QS.qn;
 }
-function sfb(tp,correctAns){
+async function sfb(tp,correctAns){
  var ov=document.getElementById('fov');
  var fi=document.getElementById('fi'),ft=document.getElementById('ftit'),fp=document.getElementById('fpts');
  if(tp==='ok'){
@@ -3633,8 +4129,8 @@ function sfb(tp,correctAns){
   }
   /* Garante que #fov está fechado */
   ov.classList.remove('on');
-  /* Salva recorde ANTES de zerar */
-  _saveScore();
+  /* Salva os dados ANTES de zerar */
+  await _saveScore(true);
   /* Captura pontuação e zera */
   var oldScore=QS.sc;
   QS.sc=0;QS.hits=0;
@@ -3660,8 +4156,9 @@ function _resetAndPlay(){
  _combo=0;var cbr=document.getElementById('combo-banner');if(cbr)cbr.classList.remove('on');
  /* Reseta estado completo */
  QS.ans=false;
- QS.sc=0;QS.qn=0;QS.tot=0;QS.hits=0;
- QS.dbi=-1;
+QS.usedCombos={};
+QS.sc=0;QS.qn=0;QS.tot=0;QS.hits=0;
+QS.dbi=-1;
  _dbOrder=_buildDbOrder(QUIZ_MODE||'v4');
  /* Atualiza displays de score */
  var qsd=document.getElementById('qsd');if(qsd)qsd.textContent='Score: 0';
@@ -3726,10 +4223,10 @@ function _showResetScreen(oldScore,correctAns,tp){
  }
  el.style.display='flex';
 }
-function showResult(){
+async function showResult(){
  clearInterval(QS.ti);
  document.getElementById('fov').classList.remove('on');
- var isRec=_saveScore();
+ var isRec=await _saveScore(false);
  var pct=QS.tot>0?Math.round((QS.hits/QS.tot)*100):0;
  var u=gc();
  /* salvar sessão */
@@ -3794,10 +4291,76 @@ document.addEventListener('keydown',function(e){
  if(e.key==='Enter'){var a=document.querySelector('.scr.on');if(a&&a.id==='sq')suba();}
  if(e.key==='Escape')document.querySelectorAll('.mbg.on').forEach(function(m){m.classList.remove('on');});
 });
-document.addEventListener('DOMContentLoaded',function(){
- var u=gc();
- if(u){L=u.language||'pt';stheme(u.theme||'night');i18n();uhdr();rhs();go('sh');ipart('hc');}
- else{i18n();go('sa');ipart('pc');}
+document.addEventListener('DOMContentLoaded',async function(){
+  i18n();
+
+  try{
+    var {data:{session},error}=await supabaseClient.auth.getSession();
+
+    if(error){
+      console.error(error);
+      go('sa');
+      ipart('pc');
+      return;
+    }
+
+    if(!session){
+      go('sa');
+      ipart('pc');
+      return;
+    }
+
+    var {data:profile,error:profileError}=await supabaseClient
+      .from('profiles')
+      .select('*')
+      .eq('id',session.user.id)
+      .single();
+
+    if(profileError){
+      console.error(profileError);
+      go('sa');
+      ipart('pc');
+      return;
+    }
+
+    var nu={
+      id:session.user.id,
+      username:profile.username||profile.name||'Usuário',
+      email:profile.email||session.user.email,
+      bio:profile.bio||'',
+      title:profile.title||'',
+      turma:profile.turma||'',
+      photo:profile.photo||'',
+      pp:{
+        x:profile.pp_x||0,
+        y:profile.pp_y||0
+      },
+      pz:profile.pz||1,
+      theme:profile.theme||'night',
+      language:profile.language||'pt',
+      best:0,
+      score:0
+    };
+
+    sc(nu);
+
+    PS=nu.photo;
+    PP=nu.pp;
+    PZ=nu.pz;
+
+    L=nu.language;
+    stheme(nu.theme);
+    i18n();
+    uhdr();
+    rhs();
+    go('sh');
+    ipart('hc');
+
+  }catch(err){
+    console.error(err);
+    go('sa');
+    ipart('pc');
+  }
 });
 // Expose functions to global scope for inline onclick handlers
 window.stab=stab;window.sttab=sttab;window.eye=eye;window.om=om;window.dologin=dologin;
