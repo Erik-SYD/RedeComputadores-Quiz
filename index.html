@@ -1806,12 +1806,24 @@ async function doreg(){
   se('ree','Erro ao criar a conta.');
  }
 }
-function dogoogle(){
- var el=document.getElementById('mgoog');
- document.getElementById('goog-email').value='';
- document.getElementById('goog-err').textContent='';
- el.classList.add('on');
- setTimeout(function(){document.getElementById('goog-email').focus();},120);
+async function dogoogle(){
+ try{
+  var {error}=await supabaseClient.auth.signInWithOAuth({
+   provider:'google',
+   options:{
+    redirectTo:window.location.origin+window.location.pathname
+   }
+  });
+
+  if(error){
+   console.error('Erro ao entrar com Google:',error);
+   se('lue','Não foi possível entrar com Google.');
+  }
+
+ }catch(err){
+  console.error('Erro ao entrar com Google:',err);
+  se('lue','Erro ao entrar com Google.');
+ }
 }
 function dogoogle_confirm(){
  var e=document.getElementById('goog-email').value.trim();
