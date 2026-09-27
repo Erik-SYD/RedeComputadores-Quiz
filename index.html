@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>Network Quiz Pro</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -189,12 +188,6 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .gmodal-confirm:hover{background:#1557b0;}
 .gmodal-info{font-size:.68rem;color:#9aa0a6;border-top:1px solid #e8eaed;padding-top:.75rem;line-height:1.6;}
 /* EMAILJS BANNER */
-.ejsbanner{background:var(--sf2);border:1px solid var(--line);border-radius:var(--r);padding:.75rem .9rem;display:flex;gap:.6rem;align-items:flex-start;position:relative;}
-.ejsbanner.hid{display:none;}
-.ejsbanner-icon{font-size:1.1rem;flex:none;margin-top:.05rem;}
-.ejsbanner-body{flex:1;font-size:.68rem;color:var(--muted);line-height:1.75;}
-.ejsbanner-body strong{color:var(--text);}
-.ejsbanner-close{position:absolute;top:.45rem;right:.55rem;background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;padding:.1rem;}
 .bgoog:hover{background:var(--sf3);}
 .div{display:flex;align-items:center;gap:.7rem;color:var(--muted);font-size:.7rem;}
 .div::before,.div::after{content:'';flex:1;height:1px;background:var(--line);}
@@ -411,10 +404,6 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .tc .tn{font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
 .tc.on .tn{color:var(--ac);}
 /* LANG */
-.lpills{display:flex;flex-wrap:wrap;gap:.42rem;}
-.lp{padding:.28rem .68rem;background:var(--sf2);border:1px solid var(--line);border-radius:999px;font-size:.7rem;cursor:pointer;transition:all .2s;color:var(--muted);}
-.lp:hover{border-color:var(--ac);color:var(--text);}
-.lp.on{border-color:var(--ac);background:var(--acd);color:var(--ac);}
 .cc{font-size:.6rem;color:var(--muted);text-align:right;}
 ::-webkit-scrollbar{width:.3rem;}
 ::-webkit-scrollbar-thumb{border-radius:999px;background:rgba(128,128,128,.28);}
@@ -430,9 +419,6 @@ textarea.inp{resize:vertical;min-height:66px;}
 #pc{position:absolute;inset:0;pointer-events:none;}
 @keyframes shake-inp{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-5px);}40%,80%{transform:translateX(5px);}}
 .shake-inp{animation:shake-inp .4s ease;}
-#login-lang-sel{display:flex;gap:.45rem;justify-content:center;margin-bottom:.6rem;}
-.llbtn{background:none;border:1px solid var(--line,#2a3040);border-radius:10px;padding:.28rem .6rem;font-size:.78rem;cursor:pointer;color:var(--muted,#8892a4);transition:all .15s;}
-.llbtn.on{border-color:var(--ac,#22d3ee);color:var(--ac,#22d3ee);background:rgba(34,211,238,.08);font-weight:700;}
 /* ===== SOBRE SCREEN ===== */
 .sab-hero{display:flex;flex-direction:column;align-items:center;gap:.45rem;padding:1.6rem 1rem 1.2rem;text-align:center;}
 .sab-hero-icon{font-size:3.2rem;filter:drop-shadow(0 0 18px rgba(34,211,238,.45));animation:ldpulse 2.4s ease-in-out infinite;}
@@ -468,6 +454,7 @@ const supabaseClient = window.supabase.createClient(
     SUPABASE_KEY
 );
 </script>
+<link rel="icon" type="image/png" href="favicon.png">
 </head>
 <body>
 <!-- LOADING SCREEN -->
@@ -491,8 +478,8 @@ const supabaseClient = window.supabase.createClient(
   <div class="aa">
    <canvas id="pc"></canvas>
    <div style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:.9rem;text-align:center">
-    <div class="alogo" style="animation:ldpulse 2s ease-in-out infinite" data-i="app_name">&#127760; NETWORK QUIZ PRO</div>
-    <div class="atag" data-i="tagline">// Infinite networking challenge //</div>
+    <div class="alogo" style="animation:ldpulse 2s ease-in-out infinite" >&#127760; NETWORK QUIZ PRO</div>
+    <div class="atag" >// Infinite networking challenge //</div>
     <!-- FRASES ROTATIVAS -->
     <div id="auth-quote" style="font-size:.72rem;color:var(--muted);max-width:280px;line-height:1.75;min-height:2.8rem;transition:opacity .5s;"></div>
     <!-- BADGES -->
@@ -513,47 +500,37 @@ const supabaseClient = window.supabase.createClient(
   <div class="af">
    <div class="abox">
     <!-- SELETOR DE IDIOMA NO LOGIN -->
-    <div id="login-lang-sel">
-     <button class="llbtn on" id="llbtn-pt" onclick="loginLang('pt')">🇧🇷 PT</button>
-     <button class="llbtn" id="llbtn-en" onclick="loginLang('en')">🇺🇸 EN</button>
-     <button class="llbtn" id="llbtn-es" onclick="loginLang('es')">🇪🇸 ES</button>
-    </div>
     <div style="text-align:center;margin-bottom:.2rem">
-     <div style="font-size:1.25rem;font-weight:800;color:var(--ac);text-shadow:0 0 14px rgba(34,211,238,.4)" data-i="app_name">NETWORK QUIZ</div>
-     <div style="font-size:.66rem;color:var(--muted);margin-top:.18rem" data-i="auth_welcome">Bem-vindo de volta</div>
+     <div style="font-size:1.25rem;font-weight:800;color:var(--ac);text-shadow:0 0 14px rgba(34,211,238,.4)" >NETWORK QUIZ</div>
+     <div style="font-size:.66rem;color:var(--muted);margin-top:.18rem" >Bem-vindo de volta</div>
     </div>
     <div class="tabs">
-     <button class="tbtn on" id="tl" onclick="stab('l')" data-i="tab_login">ENTRAR</button>
-     <button class="tbtn" id="tr" onclick="stab('r')" data-i="tab_reg">CRIAR CONTA</button>
+     <button class="tbtn on" id="tl" onclick="stab('l')" >ENTRAR</button>
+     <button class="tbtn" id="tr" onclick="stab('r')" >CRIAR CONTA</button>
     </div>
     <!-- LOGIN -->
     <div id="fl" class="fc">
-     <div class="fld"><label data-i="lbl_user">Usuário ou E-mail</label><input class="inp" id="lu" type="text" autocomplete="username" placeholder="seu@email.com"><div class="em" id="lue"></div></div>
-     <div class="fld"><label data-i="lbl_pass">Senha</label><div class="fw"><input class="inp" id="lp" type="password" autocomplete="current-password" placeholder="••••••"><button class="eye" onclick="eye('lp',this)">👁</button></div><div class="em" id="lpe"></div></div>
-     <div style="text-align:right"><button class="lbtn" onclick="om('mr')" data-i="forgot">Esqueceu a senha?</button></div>
-     <button class="btn bp" onclick="dologin()" data-i="btn_login">ENTRAR</button>
-     <div class="ejsbanner" id="ejsb">
-      <div class="ejsbanner-icon">&#128231;</div>
-      <div class="ejsbanner-body"><strong>Para ativar e-mails reais de recupera&#231;&#227;o:</strong><br>1. Crie conta em <strong>emailjs.com</strong> (gratuito)<br>2. Crie um <em>Email Service</em> e um <em>Template</em><br>3. Substitua <code>YOUR_PUBLIC_KEY</code>, <code>YOUR_SERVICE_ID</code> e <code>YOUR_TEMPLATE_ID</code> no c&#243;digo</div>
-      <button class="ejsbanner-close" onclick="document.getElementById('ejsb').classList.add('hid')" title="Fechar">&#10005;</button>
-     </div>
-     <div class="div"><span data-i="or">── ou ──</span></div>
+     <div class="fld"><label >Usuário ou E-mail</label><input class="inp" id="lu" type="text" autocomplete="username" placeholder="seu@email.com"><div class="em" id="lue"></div></div>
+     <div class="fld"><label >Senha</label><div class="fw"><input class="inp" id="lp" type="password" autocomplete="current-password" placeholder="••••••"><button class="eye" onclick="eye('lp',this)">👁</button></div><div class="em" id="lpe"></div></div>
+     <div style="text-align:right"><button class="lbtn" onclick="om('mr')" >Esqueceu a senha?</button></div>
+     <button class="btn bp" onclick="dologin()" >ENTRAR</button>
+     <div class="div"><span >── ou ──</span></div>
      <button class="btn bgoog" onclick="dogoogle()">
       <svg width="15" height="15" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-3.59-13.46-8.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-      <span data-i="btn_google">Continuar com Google</span>
+      <span >Continuar com Google</span>
      </button>
     </div>
     <!-- REGISTER -->
     <div id="fr" class="fc hid">
-     <div class="fld"><label data-i="lbl_uname">Nome de usuário</label><input class="inp" id="rn" type="text" autocomplete="username" placeholder="min3chars"><div class="em" id="rne"></div></div>
-     <div class="fld"><label data-i="lbl_email">E-mail</label><input class="inp" id="re" type="email" autocomplete="email" placeholder="seu@email.com"><div class="em" id="ree"></div></div>
-     <div class="fld"><label data-i="lbl_pass">Senha</label><div class="fw"><input class="inp" id="rp" type="password" autocomplete="new-password" placeholder="••••••" oninput="pwstr(this.value)"><button class="eye" onclick="eye('rp',this)">👁</button></div><div class="pws"><div class="pwb" id="pb1"></div><div class="pwb" id="pb2"></div><div class="pwb" id="pb3"></div></div><div class="pwl" id="pwl"></div><div class="em" id="rpe"></div></div>
-     <div class="fld"><label data-i="lbl_conf">Confirmar senha</label><div class="fw"><input class="inp" id="rp2" type="password" autocomplete="new-password" placeholder="••••••"><button class="eye" onclick="eye('rp2',this)">👁</button></div><div class="em" id="rp2e"></div></div>
-     <button class="btn bp" onclick="doreg()" data-i="btn_reg">CRIAR CONTA</button>
-     <div class="div"><span data-i="or">── ou ──</span></div>
+     <div class="fld"><label >Nome de usuário</label><input class="inp" id="rn" type="text" autocomplete="username" placeholder="min3chars"><div class="em" id="rne"></div></div>
+     <div class="fld"><label >E-mail</label><input class="inp" id="re" type="email" autocomplete="email" placeholder="seu@email.com"><div class="em" id="ree"></div></div>
+     <div class="fld"><label >Senha</label><div class="fw"><input class="inp" id="rp" type="password" autocomplete="new-password" placeholder="••••••" oninput="pwstr(this.value)"><button class="eye" onclick="eye('rp',this)">👁</button></div><div class="pws"><div class="pwb" id="pb1"></div><div class="pwb" id="pb2"></div><div class="pwb" id="pb3"></div></div><div class="pwl" id="pwl"></div><div class="em" id="rpe"></div></div>
+     <div class="fld"><label >Confirmar senha</label><div class="fw"><input class="inp" id="rp2" type="password" autocomplete="new-password" placeholder="••••••"><button class="eye" onclick="eye('rp2',this)">👁</button></div><div class="em" id="rp2e"></div></div>
+     <button class="btn bp" onclick="doreg()" >CRIAR CONTA</button>
+     <div class="div"><span >── ou ──</span></div>
      <button class="btn bgoog" onclick="dogoogle()">
       <svg width="15" height="15" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-3.59-13.46-8.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-      <span data-i="btn_google">Continuar com Google</span>
+      <span >Continuar com Google</span>
      </button>
     </div>
    </div>
@@ -704,12 +681,12 @@ const supabaseClient = window.supabase.createClient(
    <span class="greeting" id="hgreet">Bem-vindo de volta!</span>
   </div>
   <button class="ibtn" onclick="go('sp')" title="Perfil">⚙</button>
-  <button class="btn bg" style="font-size:.7rem;padding:.32rem .65rem" onclick="logout()" data-i="btn_out">SAIR</button>
+  <button class="btn bg" style="font-size:.7rem;padding:.32rem .65rem" onclick="logout()" >SAIR</button>
  </div>
  <div class="hbody" style="padding:1.2rem 1rem;gap:1rem;overflow-y:auto;justify-content:flex-start;">
   <div style="display:flex;flex-direction:column;align-items:center;gap:.3rem;padding-top:.5rem">
-   <div class="htitle" id="htitle" data-i="home_title" style="font-size:clamp(1.4rem,5vw,2.4rem)">&#127760; NETWORK QUIZ PRO</div>
-   <div class="hsub" data-i="home_sub">Domine redes. Domine o futuro.</div>
+   <div class="htitle" id="htitle"  style="font-size:clamp(1.4rem,5vw,2.4rem)">&#127760; NETWORK QUIZ PRO</div>
+   <div class="hsub" >Domine redes. Domine o futuro.</div>
    <div style="display:flex;gap:.5rem;margin-top:.2rem">
     <span style="font-size:.6rem;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.3);color:var(--ac);padding:.15rem .5rem;border-radius:999px;">&#128293; +500 questões</span>
     <span id="badge-home" style="font-size:.6rem;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.3);color:var(--ac2);padding:.15rem .5rem;border-radius:999px;">&#128101; ...</span>
@@ -751,7 +728,7 @@ const supabaseClient = window.supabase.createClient(
    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M3 2.5l10 5.5-10 5.5V2.5z"/></svg>
    &#9889; JOGAR AGORA
   </button>
-  <div style="font-size:.6rem;color:var(--muted);text-align:center;" data-i="home_types">
+  <div style="font-size:.6rem;color:var(--muted);text-align:center;" >
  <span data-tip="Último endereço da sub-rede">Broadcast</span> ·
  <span data-tip="Classless Inter-Domain Routing">CIDR</span> ·
  <span data-tip="Representação em base 2">Binário</span> ·
@@ -824,7 +801,7 @@ const supabaseClient = window.supabase.createClient(
 </div>
 <div id="sq" class="scr">
  <div class="qhdr">
-  <button class="btn bg" style="font-size:.7rem;padding:.32rem .65rem" onclick="stopq()">&#8592; <span data-i="btn_bh">Sair do Quiz</span></button>
+  <button class="btn bg" style="font-size:.7rem;padding:.32rem .65rem" onclick="stopq()">&#8592; <span >Sair do Quiz</span></button>
   <div class="gr"></div>
   <span class="qsd" id="qsh">Score: 0</span>
  </div>
@@ -848,7 +825,7 @@ const supabaseClient = window.supabase.createClient(
   </div>
   <div class="nc" id="qnetbox">
    <div>
-    <div style="font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.18rem" data-i="lbl_net">Rede</div>
+    <div style="font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.18rem" >Rede</div>
     <div class="nv" id="nd">192.168.1.0</div>
    </div>
    <div style="text-align:right">
@@ -863,7 +840,7 @@ const supabaseClient = window.supabase.createClient(
   <div class="opts" id="qmc" style="display:none"></div>
   <div class="ir" id="qinput">
    <input class="ai" id="ai" type="text" autocomplete="off" spellcheck="false" placeholder="Digite sua resposta...">
-   <button class="btn bp" id="bc" onclick="suba()" data-i="btn_ok">OK</button>
+   <button class="btn bp" id="bc" onclick="suba()" >OK</button>
   </div>
   <div class="ht" id="ht"></div>
  </div>
@@ -875,60 +852,60 @@ const supabaseClient = window.supabase.createClient(
 <div id="sp" class="scr">
  <div class="hdr">
   <button class="btn bg" style="font-size:.7rem;padding:.32rem .65rem" onclick="go('sh')">
-   &#8592; <span data-i="btn_back">Voltar</span>
+   &#8592; <span >Voltar</span>
   </button>
-  <span style="font-size:.82rem;font-weight:700;color:var(--text);flex:1;text-align:center" data-i="prof_title">MEU PERFIL</span>
+  <span style="font-size:.82rem;font-weight:700;color:var(--text);flex:1;text-align:center" >MEU PERFIL</span>
   <div style="width:58px"></div>
  </div>
  <div class="pscr">
   <!-- PHOTO -->
   <div>
-   <div class="stit" data-i="sec_photo">Foto de Perfil</div>
+   <div class="stit" >Foto de Perfil</div>
    <div class="ppw">
     <div class="ppc" id="ppc" onclick="tpp()"></div>
-    <button class="btn bg" style="font-size:.7rem;padding:.28rem .75rem" onclick="tpp()" data-i="btn_chphoto">Alterar foto</button>
+    <button class="btn bg" style="font-size:.7rem;padding:.28rem .75rem" onclick="tpp()" >Alterar foto</button>
     <div class="ppan hid" id="ppan">
-     <div style="font-size:.7rem;font-weight:600;color:var(--text)" data-i="photo_url">Link de URL</div>
+     <div style="font-size:.7rem;font-weight:600;color:var(--text)" >Link de URL</div>
      <div class="fr">
       <input class="inp gr" id="pui" type="url" placeholder="https://...">
-      <button class="btn bp" style="padding:.48rem .75rem" onclick="apurl()" data-i="btn_ok">OK</button>
+      <button class="btn bp" style="padding:.48rem .75rem" onclick="apurl()" >OK</button>
      </div>
-     <div class="div"><span data-i="or">-- ou --</span></div>
+     <div class="div"><span >-- ou --</span></div>
      <input type="file" id="pfi" accept="image/*" style="display:none" onchange="apfile(this)">
-     <button class="btn bg" onclick="document.getElementById('pfi').click()" data-i="btn_upload">&#128247; Escolher arquivo</button>
+     <button class="btn bg" onclick="document.getElementById('pfi').click()" >&#128247; Escolher arquivo</button>
      <div id="fcw" class="frc hid" style="display:flex;flex-direction:column;gap:.48rem">
-      <div class="div"><span data-i="frame_adj">Enquadramento</span></div>
-      <label data-i="lbl_zoom">Zoom</label>
+      <div class="div"><span >Enquadramento</span></div>
+      <label >Zoom</label>
       <input type="range" id="zs" min="1" max="3" step=".05" value="1" oninput="upf()">
-      <label data-i="lbl_pos">Posição</label>
+      <label >Posição</label>
       <div class="pbs">
        <button class="pb" onclick="mp(-5,-5)">&#8598;</button><button class="pb" onclick="mp(0,-8)">&#8593;</button><button class="pb" onclick="mp(5,-5)">&#8599;</button>
        <button class="pb" onclick="mp(-8,0)">&#8592;</button><div class="pb cx">&#9675;</div><button class="pb" onclick="mp(8,0)">&#8594;</button>
        <button class="pb" onclick="mp(-5,5)">&#8601;</button><button class="pb" onclick="mp(0,8)">&#8595;</button><button class="pb" onclick="mp(5,5)">&#8600;</button>
       </div>
-      <button class="btn bp" onclick="cfr()" data-i="btn_cfr">Confirmar enquadramento</button>
+      <button class="btn bp" onclick="cfr()" >Confirmar enquadramento</button>
      </div>
     </div>
    </div>
   </div>
   <!-- INFO -->
   <div>
-   <div class="stit" data-i="sec_info">Informações</div>
+   <div class="stit" >Informações</div>
    <div class="fc">
-    <div class="fld"><label data-i="lbl_name">Nome</label><input class="inp" id="pname" type="text"></div>
+    <div class="fld"><label >Nome</label><input class="inp" id="pname" type="text"></div>
     <div class="fld"><label>Bio <span class="cc" id="bcc">0/150</span></label><textarea class="inp" id="pbio" maxlength="150" oninput="document.getElementById('bcc').textContent=this.value.length+'/150'"></textarea></div>
-    <div class="fld"><label data-i="lbl_title">Título</label><input class="inp" id="ptit" type="text" placeholder="Ex: Estudante de Redes"></div>
-    <div class="fld"><label data-i="lbl_turma">Turma</label><input class="inp" id="ptur" type="text" placeholder="Ex: Informática 2A"></div>
-    <button class="btn bp" onclick="savep()" data-i="btn_save">SALVAR PERFIL</button>
+    <div class="fld"><label >Título</label><input class="inp" id="ptit" type="text" placeholder="Ex: Estudante de Redes"></div>
+    <div class="fld"><label >Turma</label><input class="inp" id="ptur" type="text" placeholder="Ex: Informática 2A"></div>
+    <button class="btn bp" onclick="savep()" >SALVAR PERFIL</button>
    </div>
   </div>
   <!-- THEMES -->
   <div>
-   <div class="stit" data-i="sec_theme">Tema</div>
+   <div class="stit" >Tema</div>
    <div class="tgrid">
-    <div class="tc" data-tid="night" onclick="stheme('night')"><div class="ti">&#127769;</div><div class="tn" data-i="th_night">Noite</div></div>
-    <div class="tc" data-tid="day" onclick="stheme('day')"><div class="ti">&#9728;</div><div class="tn" data-i="th_day">Dia</div></div>
-    <div class="tc" data-tid="retro" onclick="stheme('retro')"><div class="ti">&#128250;</div><div class="tn" data-i="th_retro">Retro</div></div>
+    <div class="tc" data-tid="night" onclick="stheme('night')"><div class="ti">&#127769;</div><div class="tn" >Noite</div></div>
+    <div class="tc" data-tid="day" onclick="stheme('day')"><div class="ti">&#9728;</div><div class="tn" >Dia</div></div>
+    <div class="tc" data-tid="retro" onclick="stheme('retro')"><div class="ti">&#128250;</div><div class="tn" >Retro</div></div>
     <div class="tc" data-tid="neon" onclick="stheme('neon')"><div class="ti">&#9889;</div><div class="tn">Neon</div></div>
     <div class="tc" data-tid="calm" onclick="stheme('calm')"><div class="ti">&#127754;</div><div class="tn">Calmo</div></div>
     <div class="tc" data-tid="chess-night" onclick="stheme('chess-night')"><div class="ti">&#9823;</div><div class="tn">Xadrez Noite</div></div>
@@ -938,24 +915,11 @@ const supabaseClient = window.supabase.createClient(
     <div class="tc" data-tid="artistic" onclick="stheme('artistic')"><div class="ti">&#127912;</div><div class="tn">Art&#237;stico</div></div>
    </div>
   </div>
-  <!-- LANG -->
-  <div>
-   <div class="stit" data-i="sec_lang">Idioma</div>
-   <div class="lpills">
-    <div class="lp" data-lang="pt" onclick="slang('pt')">&#127463;&#127479; Português</div>
-    <div class="lp" data-lang="en" onclick="slang('en')">&#127482;&#127480; English</div>
-    <div class="lp" data-lang="es" onclick="slang('es')">&#127466;&#127480; Español</div>
-    <div class="lp" data-lang="fr" onclick="slang('fr')">&#127467;&#127479; Français</div>
-    <div class="lp" data-lang="ru" onclick="slang('ru')">&#127479;&#127482; Русский</div>
-    <div class="lp" data-lang="ja" onclick="slang('ja')">&#127471;&#127477; 日本語</div>
-    <div class="lp" data-lang="zh" onclick="slang('zh')">&#127464;&#127475; 中文</div>
-   </div>
-  </div>
   <div style="height:1rem"></div>
   <!-- BOTÃO RESETAR PROGRESSO -->
   <div style="padding:.5rem 0 .5rem;display:flex;flex-direction:column;align-items:center;gap:.5rem">
    <button id="btn-reset-prog" onclick="_showResetProgModal()" style="background:linear-gradient(135deg,#e63946,#c1121f);color:#fff;border:none;border-radius:14px;padding:.7rem 1.8rem;font-size:.82rem;font-weight:700;cursor:pointer;letter-spacing:.04em;display:flex;align-items:center;gap:.5rem;">
-    &#128260; Resetar Progresso
+    &#128260; <span >Resetar Progresso</span>
    </button>
    <div style="font-size:.62rem;color:var(--muted);text-align:center;">Zera sessões, recorde e acertos sem apagar sua conta</div>
   </div>
@@ -980,7 +944,7 @@ const supabaseClient = window.supabase.createClient(
  <div class="ft" id="ftit">CORRETO!</div>
  <div class="fa" id="fans">Resposta: <span id="fcor"></span></div>
  <div class="fp" id="fpts">+1</div>
- <div class="fn" data-i="fb_next">Próxima pergunta em 2s...</div>
+ <div class="fn" >Próxima pergunta em 2s...</div>
 </div>
 
 <!-- GOOGLE LOGIN MODAL -->
@@ -1008,20 +972,65 @@ const supabaseClient = window.supabase.createClient(
 <div class="mbg" id="mr">
  <div class="mc">
   <button class="mcx" onclick="cm('mr')">&#10005;</button>
-  <div style="font-size:.98rem;font-weight:700;color:var(--text)" data-i="rec_title">Recuperar Senha</div>
-  <div style="font-size:.76rem;color:var(--muted)" data-i="rec_desc">Digite seu e-mail para receber as instruções de recuperação.</div>
+  <div style="font-size:.98rem;font-weight:700;color:var(--text)" >Recuperar Senha</div>
+  <div style="font-size:.76rem;color:var(--muted)" >Digite seu e-mail para receber as instruções de recuperação.</div>
   <div id="rf" class="fc">
-   <div class="fld"><label data-i="lbl_email">E-mail</label><input class="inp" id="re2" type="email" placeholder="seu@email.com"><div class="em" id="re2e"></div></div>
-   <button class="btn bp" onclick="dorec()" data-i="btn_send">ENVIAR</button>
+   <div class="fld"><label >E-mail</label><input class="inp" id="re2" type="email" placeholder="seu@email.com"><div class="em" id="re2e"></div></div>
+   <button class="btn bp" onclick="dorec()" >ENVIAR</button>
   </div>
   <div class="smsg" id="rs">
    <div class="sico">&#10003;</div>
-   <div style="font-size:.88rem;font-weight:700;color:var(--gd)" data-i="rec_sent">E-mail enviado!</div>
+   <div style="font-size:.88rem;font-weight:700;color:var(--gd)" >E-mail enviado!</div>
    <div style="font-size:.76rem;color:var(--muted)" id="rsto"></div>
   </div>
  </div>
 </div>
+<!-- RESET PASSWORD MODAL -->
+<div class="mbg" id="mreset">
+ <div class="mc">
+  <div style="font-size:.98rem;font-weight:700;color:var(--text)">
+   Nova senha
+  </div>
 
+  <div style="font-size:.76rem;color:var(--muted);margin-bottom:1rem">
+   Digite sua nova senha para recuperar o acesso à sua conta.
+  </div>
+
+  <div class="fld">
+   <label>Nova senha</label>
+   <div class="fw">
+    <input
+     class="inp"
+     id="newpass"
+     type="password"
+     autocomplete="new-password"
+     placeholder="••••••"
+    >
+    <button class="eye" onclick="eye('newpass',this)">👁</button>
+   </div>
+   <div class="em" id="newpasse"></div>
+  </div>
+
+  <div class="fld">
+   <label>Confirmar nova senha</label>
+   <div class="fw">
+    <input
+     class="inp"
+     id="newpass2"
+     type="password"
+     autocomplete="new-password"
+     placeholder="••••••"
+    >
+    <button class="eye" onclick="eye('newpass2',this)">👁</button>
+   </div>
+   <div class="em" id="newpass2e"></div>
+  </div>
+
+  <button class="btn bp" onclick="saveNewPassword()">
+   SALVAR NOVA SENHA
+  </button>
+ </div>
+</div>
 <div class="toast" id="toast"></div>
 <script>
 (function(){
@@ -1037,25 +1046,7 @@ const supabaseClient = window.supabase.createClient(
  }catch(e){}
 })();
 (function(){'use strict';
-var TX={
-pt:{app_name:'NETWORK QUIZ',tagline:'// Desafio infinito de redes //',auth_welcome:'Bem-vindo de volta',tab_login:'ENTRAR',tab_reg:'CRIAR CONTA',lbl_user:'Usuário ou E-mail',lbl_pass:'Senha',lbl_conf:'Confirmar senha',lbl_uname:'Nome de usuário',lbl_email:'E-mail',lbl_name:'Nome',lbl_title:'Título',lbl_turma:'Turma',forgot:'Esqueceu a senha?',btn_login:'ENTRAR',btn_reg:'CRIAR CONTA',btn_google:'Continuar com Google',btn_out:'SAIR',btn_play:'PLAY',btn_back:'Voltar',btn_bh:'Sair do Quiz',btn_ok:'OK',btn_save:'SALVAR PERFIL',btn_send:'ENVIAR',btn_chphoto:'Alterar foto',btn_cfr:'Confirmar enquadramento',btn_upload:'Escolher arquivo',or:'── ou ──',home_title:'REDE DE\nCOMPUTADORES',home_sub:'Teste seus conhecimentos em redes',home_types:'Broadcast · Máscara · Binário · Gateway · Primeiro Host · Último Host',lbl_score:'Score',lbl_best:'Recorde',lbl_net:'Rede',prof_title:'MEU PERFIL',sec_photo:'Foto de Perfil',sec_info:'Informações',sec_theme:'Tema',sec_lang:'Idioma',photo_url:'Link de URL',frame_adj:'Enquadramento',lbl_zoom:'Zoom',lbl_pos:'Posição',th_night:'Noite',th_day:'Dia',th_retro:'Retro',th_neon:'Neon',th_chess:'Xadrez',th_calm:'Calmo',rec_title:'Recuperar Senha',rec_desc:'Digite seu e-mail para receber as instruções de recuperação.',rec_sent:'E-mail enviado!',fb_next:'Próxima pergunta em 2s...',pw_w:'Fraca',pw_m:'Média',pw_s:'Forte',q_bc:'Qual é o endereço de <strong>broadcast</strong> da rede <code>%N%/%C%</code>?',q_mk:'Qual é a <strong>máscara de sub-rede</strong> da rede <code>%N%/%C%</code>?',q_bn:'Converta o endereço de rede <code>%N%</code> para <strong>binário</strong>:',q_gw:'Qual é o <strong>gateway padrão</strong> da rede <code>%N%/%C%</code>?',q_fh:'Qual é o <strong>primeiro host utilizável</strong> da rede <code>%N%/%C%</code>?',q_lh:'Qual é o <strong>último host utilizável</strong> da rede <code>%N%/%C%</code>?',b_bc:'Broadcast',b_mk:'Máscara',b_bn:'Binário',b_gw:'Gateway',b_fh:'Primeiro Host',b_lh:'Último Host',h_ip:'Formato: X.X.X.X',h_mk:'Formato: 255.255.255.0 ou /24',h_bn:'Formato: 11000000.10101000.00000001.00000000',fb_ok:'CORRETO!',fb_no:'ERRADO!',fb_to:'TEMPO ESGOTADO!',e_req:'Campo obrigatório',e_email:'E-mail inválido',e_uname:'Mínimo 3 caracteres',e_pshort:'Mínimo 6 caracteres',e_pmatch:'Senhas não coincidem',e_exists:'Usuário já cadastrado',e_login:'Usuário ou senha incorretos',t_saved:'Perfil salvo!',t_photo:'Foto atualizada!',e_empty:'Digite sua resposta!'},
-en:{app_name:'NETWORK QUIZ',tagline:'// Infinite networking challenge //',auth_welcome:'Welcome back',tab_login:'LOGIN',tab_reg:'SIGN UP',lbl_user:'Username or Email',lbl_pass:'Password',lbl_conf:'Confirm password',lbl_uname:'Username',lbl_email:'Email',lbl_name:'Name',lbl_title:'Title',lbl_turma:'Class',forgot:'Forgot password?',btn_login:'LOGIN',btn_reg:'SIGN UP',btn_google:'Continue with Google',btn_out:'LOGOUT',btn_play:'PLAY',btn_back:'Back',btn_bh:'Exit Quiz',btn_ok:'OK',btn_save:'SAVE PROFILE',btn_send:'SEND',btn_chphoto:'Change photo',btn_cfr:'Confirm framing',btn_upload:'Choose file',or:'── or ──',home_title:'COMPUTER\nNETWORKS',home_sub:'Test your networking knowledge',home_types:'Broadcast · Mask · Binary · Gateway · First Host · Last Host',lbl_score:'Score',lbl_best:'Best',lbl_net:'Network',prof_title:'MY PROFILE',sec_photo:'Profile Photo',sec_info:'Information',sec_theme:'Theme',sec_lang:'Language',photo_url:'Image URL',frame_adj:'Framing',lbl_zoom:'Zoom',lbl_pos:'Position',th_night:'Night',th_day:'Day',th_retro:'Retro',th_neon:'Neon',th_chess:'Chess',th_calm:'Calm',rec_title:'Recover Password',rec_desc:'Enter your email to receive recovery instructions.',rec_sent:'Email sent!',fb_next:'Next question in 2s...',pw_w:'Weak',pw_m:'Medium',pw_s:'Strong',q_bc:'What is the <strong>broadcast</strong> address of network <code>%N%/%C%</code>?',q_mk:'What is the <strong>subnet mask</strong> of network <code>%N%/%C%</code>?',q_bn:'Convert the network address <code>%N%</code> to <strong>binary</strong>:',q_gw:'What is the <strong>default gateway</strong> of network <code>%N%/%C%</code>?',q_fh:'What is the <strong>first usable host</strong> of network <code>%N%/%C%</code>?',q_lh:'What is the <strong>last usable host</strong> of network <code>%N%/%C%</code>?',b_bc:'Broadcast',b_mk:'Mask',b_bn:'Binary',b_gw:'Gateway',b_fh:'First Host',b_lh:'Last Host',h_ip:'Format: X.X.X.X',h_mk:'Format: 255.255.255.0 or /24',h_bn:'Format: 11000000.10101000.00000001.00000000',fb_ok:'CORRECT!',fb_no:'WRONG!',fb_to:'TIME UP!',e_req:'Required field',e_email:'Invalid email',e_uname:'Minimum 3 characters',e_pshort:'Minimum 6 characters',e_pmatch:'Passwords do not match',e_exists:'User already registered',e_login:'Invalid username or password',t_saved:'Profile saved!',t_photo:'Photo updated!',e_empty:'Type your answer!'},
-es:{app_name:'NETWORK QUIZ',tagline:'// Desafío infinito de redes //',auth_welcome:'Bienvenido de nuevo',tab_login:'ENTRAR',tab_reg:'REGISTRARSE',lbl_user:'Usuario o Email',lbl_pass:'Contraseña',lbl_conf:'Confirmar contraseña',lbl_uname:'Nombre de usuario',lbl_email:'Email',lbl_name:'Nombre',lbl_title:'Título',lbl_turma:'Clase',forgot:'¿Olvidaste tu contraseña?',btn_login:'ENTRAR',btn_reg:'REGISTRARSE',btn_google:'Continuar con Google',btn_out:'SALIR',btn_play:'JUGAR',btn_back:'Volver',btn_bh:'Salir del Quiz',btn_ok:'OK',btn_save:'GUARDAR PERFIL',btn_send:'ENVIAR',btn_chphoto:'Cambiar foto',btn_cfr:'Confirmar encuadre',btn_upload:'Elegir archivo',or:'── o ──',home_title:'REDES DE\nCOMPUTADORAS',home_sub:'Pon a prueba tus conocimientos',home_types:'Broadcast · Máscara · Binario · Gateway · Primer Host · Último Host',lbl_score:'Puntos',lbl_best:'Récord',lbl_net:'Red',prof_title:'MI PERFIL',sec_photo:'Foto de Perfil',sec_info:'Información',sec_theme:'Tema',sec_lang:'Idioma',photo_url:'URL de imagen',frame_adj:'Encuadre',lbl_zoom:'Zoom',lbl_pos:'Posición',th_night:'Noche',th_day:'Día',th_retro:'Retro',th_neon:'Neon',th_chess:'Ajedrez',th_calm:'Calma',rec_title:'Recuperar Contraseña',rec_desc:'Ingresa tu email para recibir instrucciones.',rec_sent:'¡Email enviado!',fb_next:'Siguiente pregunta en 2s...',pw_w:'Débil',pw_m:'Media',pw_s:'Fuerte',q_bc:'¿Cuál es la dirección de <strong>broadcast</strong> de la red <code>%N%/%C%</code>?',q_mk:'¿Cuál es la <strong>máscara de subred</strong> de la red <code>%N%/%C%</code>?',q_bn:'Convierte la dirección de red <code>%N%</code> a <strong>binario</strong>:',q_gw:'¿Cuál es el <strong>gateway predeterminado</strong> de la red <code>%N%/%C%</code>?',q_fh:'¿Cuál es el <strong>primer host utilizable</strong> de la red <code>%N%/%C%</code>?',q_lh:'¿Cuál es el <strong>último host utilizable</strong> de la red <code>%N%/%C%</code>?',b_bc:'Broadcast',b_mk:'Máscara',b_bn:'Binario',b_gw:'Gateway',b_fh:'Primer Host',b_lh:'Último Host',h_ip:'Formato: X.X.X.X',h_mk:'Formato: 255.255.255.0 o /24',h_bn:'Formato: 11000000.10101000.00000001.00000000',fb_ok:'¡CORRECTO!',fb_no:'¡INCORRECTO!',fb_to:'¡TIEMPO AGOTADO!',e_req:'Campo requerido',e_email:'Email inválido',e_uname:'Mínimo 3 caracteres',e_pshort:'Mínimo 6 caracteres',e_pmatch:'Las contraseñas no coinciden',e_exists:'Usuario ya registrado',e_login:'Usuario o contraseña incorrectos',t_saved:'¡Perfil guardado!',t_photo:'¡Foto actualizada!',e_empty:'¡Escribe tu respuesta!'},
-fr:{app_name:'NETWORK QUIZ',tagline:'// Défi réseau infini //',auth_welcome:'Bon retour',tab_login:'CONNEXION',tab_reg:'INSCRIPTION',lbl_user:'Utilisateur ou Email',lbl_pass:'Mot de passe',lbl_conf:'Confirmer le mot de passe',lbl_uname:'Nom utilisateur',lbl_email:'Email',lbl_name:'Nom',lbl_title:'Titre',lbl_turma:'Classe',forgot:'Mot de passe oublié?',btn_login:'CONNEXION',btn_reg:'INSCRIPTION',btn_google:'Continuer avec Google',btn_out:'DÉCONNEXION',btn_play:'JOUER',btn_back:'Retour',btn_bh:'Quitter le Quiz',btn_ok:'OK',btn_save:'SAUVEGARDER',btn_send:'ENVOYER',btn_chphoto:'Changer photo',btn_cfr:'Confirmer cadrage',btn_upload:'Choisir fichier',or:'── ou ──',home_title:'RÉSEAUX\nINFORMATIQUES',home_sub:'Testez vos connaissances',home_types:'Broadcast · Masque · Binaire · Passerelle · Premier Hôte · Dernier Hôte',lbl_score:'Score',lbl_best:'Record',lbl_net:'Réseau',prof_title:'MON PROFIL',sec_photo:'Photo de Profil',sec_info:'Informations',sec_theme:'Thème',sec_lang:'Langue',photo_url:'URL image',frame_adj:'Cadrage',lbl_zoom:'Zoom',lbl_pos:'Position',th_night:'Nuit',th_day:'Jour',th_retro:'Rétro',th_neon:'Néon',th_chess:'Échecs',th_calm:'Calme',rec_title:'Récupérer mot de passe',rec_desc:'Entrez votre email pour recevoir les instructions.',rec_sent:'Email envoyé!',fb_next:'Prochaine question dans 2s...',pw_w:'Faible',pw_m:'Moyen',pw_s:'Fort',q_bc:'Quelle est l adresse de <strong>broadcast</strong> du réseau <code>%N%/%C%</code>?',q_mk:'Quel est le <strong>masque de sous-réseau</strong> du réseau <code>%N%/%C%</code>?',q_bn:'Convertissez l adresse réseau <code>%N%</code> en <strong>binaire</strong>:',q_gw:'Quelle est la <strong>passerelle par défaut</strong> du réseau <code>%N%/%C%</code>?',q_fh:'Quel est le <strong>premier hôte utilisable</strong> du réseau <code>%N%/%C%</code>?',q_lh:'Quel est le <strong>dernier hôte utilisable</strong> du réseau <code>%N%/%C%</code>?',b_bc:'Broadcast',b_mk:'Masque',b_bn:'Binaire',b_gw:'Passerelle',b_fh:'Premier Hôte',b_lh:'Dernier Hôte',h_ip:'Format: X.X.X.X',h_mk:'Format: 255.255.255.0 ou /24',h_bn:'Format: 11000000.10101000.00000001.00000000',fb_ok:'CORRECT!',fb_no:'INCORRECT!',fb_to:'TEMPS ÉCOULÉ!',e_req:'Champ requis',e_email:'Email invalide',e_uname:'Minimum 3 caractères',e_pshort:'Minimum 6 caractères',e_pmatch:'Les mots de passe ne correspondent pas',e_exists:'Utilisateur déjà enregistré',e_login:'Identifiants incorrects',t_saved:'Profil sauvegardé!',t_photo:'Photo mise à jour!'},
-ru:{app_name:'NETWORK QUIZ',tagline:'// Бесконечный сетевой квиз //',auth_welcome:'С возвращением',tab_login:'ВОЙТИ',tab_reg:'РЕГИСТРАЦИЯ',lbl_user:'Логин или Email',lbl_pass:'Пароль',lbl_conf:'Подтвердить пароль',lbl_uname:'Имя пользователя',lbl_email:'Email',lbl_name:'Имя',lbl_title:'Звание',lbl_turma:'Группа',forgot:'Забыли пароль?',btn_login:'ВОЙТИ',btn_reg:'РЕГИСТРАЦИЯ',btn_google:'Войти через Google',btn_out:'ВЫЙТИ',btn_play:'ИГРАТЬ',btn_back:'Назад',btn_bh:'Выйти из квиза',btn_ok:'OK',btn_save:'СОХРАНИТЬ',btn_send:'ОТПРАВИТЬ',btn_chphoto:'Изменить фото',btn_cfr:'Подтвердить кадрирование',btn_upload:'Выбрать файл',or:'── или ──',home_title:'КОМПЬЮТЕРНЫЕ\nСЕТИ',home_sub:'Проверьте свои знания',home_types:'Broadcast · Маска · Двоичный · Шлюз · Первый Хост · Последний Хост',lbl_score:'Очки',lbl_best:'Рекорд',lbl_net:'Сеть',prof_title:'МОЙ ПРОФИЛЬ',sec_photo:'Фото профиля',sec_info:'Информация',sec_theme:'Тема',sec_lang:'Язык',photo_url:'URL изображения',frame_adj:'Кадрирование',lbl_zoom:'Масштаб',lbl_pos:'Позиция',th_night:'Ночь',th_day:'День',th_retro:'Ретро',th_neon:'Неон',th_chess:'Шахматы',th_calm:'Спокойный',rec_title:'Восстановить пароль',rec_desc:'Введите email для получения инструкций.',rec_sent:'Email отправлен!',fb_next:'Следующий вопрос через 2с...',pw_w:'Слабый',pw_m:'Средний',pw_s:'Сильный',q_bc:'Каков адрес <strong>broadcast</strong> сети <code>%N%/%C%</code>?',q_mk:'Какова <strong>маска подсети</strong> сети <code>%N%/%C%</code>?',q_bn:'Переведите адрес сети <code>%N%</code> в <strong>двоичный</strong>:',q_gw:'Каков <strong>шлюз по умолчанию</strong> сети <code>%N%/%C%</code>?',q_fh:'Каков <strong>первый используемый хост</strong> сети <code>%N%/%C%</code>?',q_lh:'Каков <strong>последний используемый хост</strong> сети <code>%N%/%C%</code>?',b_bc:'Broadcast',b_mk:'Маска',b_bn:'Двоичный',b_gw:'Шлюз',b_fh:'Первый Хост',b_lh:'Последний Хост',h_ip:'Формат: X.X.X.X',h_mk:'Формат: 255.255.255.0 или /24',h_bn:'Формат: 11000000.10101000.00000001.00000000',fb_ok:'ВЕРНО!',fb_no:'НЕВЕРНО!',fb_to:'ВРЕМЯ ВЫШЛО!',e_req:'Обязательное поле',e_email:'Неверный email',e_uname:'Минимум 3 символа',e_pshort:'Минимум 6 символов',e_pmatch:'Пароли не совпадают',e_exists:'Пользователь уже существует',e_login:'Неверный логин или пароль',t_saved:'Профиль сохранён!',t_photo:'Фото обновлено!'},
-ja:{app_name:'NETWORK QUIZ',tagline:'// 無限ネットワーククイズ //',auth_welcome:'おかえりなさい',tab_login:'ログイン',tab_reg:'登録',lbl_user:'ユーザー名またはメール',lbl_pass:'パスワード',lbl_conf:'パスワード確認',lbl_uname:'ユーザー名',lbl_email:'メール',lbl_name:'名前',lbl_title:'肩書き',lbl_turma:'クラス',forgot:'パスワードを忘れた？',btn_login:'ログイン',btn_reg:'登録',btn_google:'Googleで続ける',btn_out:'ログアウト',btn_play:'プレイ',btn_back:'戻る',btn_bh:'クイズを終了',btn_ok:'OK',btn_save:'保存',btn_send:'送信',btn_chphoto:'写真を変更',btn_cfr:'フレームを確認',btn_upload:'ファイルを選択',or:'── または ──',home_title:'コンピュータ\nネットワーク',home_sub:'ネットワーク知識をテスト',home_types:'ブロードキャスト · マスク · 2進数 · ゲートウェイ · 最初のホスト · 最後のホスト',lbl_score:'スコア',lbl_best:'最高記録',lbl_net:'ネットワーク',prof_title:'マイプロフィール',sec_photo:'プロフィール写真',sec_info:'情報',sec_theme:'テーマ',sec_lang:'言語',photo_url:'画像URL',frame_adj:'フレーミング',lbl_zoom:'ズーム',lbl_pos:'位置',th_night:'夜',th_day:'昼',th_retro:'レトロ',th_neon:'ネオン',th_chess:'チェス',th_calm:'穏やか',rec_title:'パスワード回復',rec_desc:'回復手順を受け取るためにメールを入力してください。',rec_sent:'メール送信済み！',fb_next:'2秒後に次の問題...',pw_w:'弱い',pw_m:'普通',pw_s:'強い',q_bc:'ネットワーク <code>%N%/%C%</code> の<strong>ブロードキャスト</strong>アドレスは？',q_mk:'ネットワーク <code>%N%/%C%</code> の<strong>サブネットマスク</strong>は？',q_bn:'ネットワークアドレス <code>%N%</code> を<strong>2進数</strong>に変換:',q_gw:'ネットワーク <code>%N%/%C%</code> の<strong>デフォルトゲートウェイ</strong>は？',q_fh:'ネットワーク <code>%N%/%C%</code> の<strong>最初の使用可能ホスト</strong>は？',q_lh:'ネットワーク <code>%N%/%C%</code> の<strong>最後の使用可能ホスト</strong>は？',b_bc:'ブロードキャスト',b_mk:'マスク',b_bn:'2進数',b_gw:'ゲートウェイ',b_fh:'最初のホスト',b_lh:'最後のホスト',h_ip:'形式: X.X.X.X',h_mk:'形式: 255.255.255.0 または /24',h_bn:'形式: 11000000.10101000.00000001.00000000',fb_ok:'正解！',fb_no:'不正解！',fb_to:'時間切れ！',e_req:'必須項目',e_email:'無効なメール',e_uname:'最低3文字',e_pshort:'最低6文字',e_pmatch:'パスワードが一致しません',e_exists:'ユーザーは既に登録されています',e_login:'ユーザー名またはパスワードが間違っています',t_saved:'プロフィール保存済み！',t_photo:'写真更新済み！'},
-zh:{app_name:'NETWORK QUIZ',tagline:'// 无限网络测验 //',auth_welcome:'欢迎回来',tab_login:'登录',tab_reg:'注册',lbl_user:'用户名或邮箱',lbl_pass:'密码',lbl_conf:'确认密码',lbl_uname:'用户名',lbl_email:'邮箱',lbl_name:'姓名',lbl_title:'头衔',lbl_turma:'班级',forgot:'忘记密码？',btn_login:'登录',btn_reg:'注册',btn_google:'使用Google继续',btn_out:'退出',btn_play:'开始',btn_back:'返回',btn_bh:'退出测验',btn_ok:'确定',btn_save:'保存资料',btn_send:'发送',btn_chphoto:'更换照片',btn_cfr:'确认裁剪',btn_upload:'选择文件',or:'── 或 ──',home_title:'计算机\n网络',home_sub:'测试您的网络知识',home_types:'广播 · 掩码 · 二进制 · 网关 · 第一主机 · 最后主机',lbl_score:'分数',lbl_best:'最高分',lbl_net:'网络',prof_title:'我的资料',sec_photo:'头像',sec_info:'信息',sec_theme:'主题',sec_lang:'语言',photo_url:'图片URL',frame_adj:'裁剪',lbl_zoom:'缩放',lbl_pos:'位置',th_night:'夜晚',th_day:'白天',th_retro:'复古',th_neon:'霓虹',th_chess:'棋盘',th_calm:'平静',rec_title:'找回密码',rec_desc:'输入您的邮箱以接收找回说明。',rec_sent:'邮件已发送！',fb_next:'2秒后下一题...',pw_w:'弱',pw_m:'中',pw_s:'强',q_bc:'网络 <code>%N%/%C%</code> 的<strong>广播</strong>地址是什么？',q_mk:'网络 <code>%N%/%C%</code> 的<strong>子网掩码</strong>是什么？',q_bn:'将网络地址 <code>%N%</code> 转换为<strong>二进制</strong>:',q_gw:'网络 <code>%N%/%C%</code> 的<strong>默认网关</strong>是什么？',q_fh:'网络 <code>%N%/%C%</code> 的<strong>第一个可用主机</strong>是什么？',q_lh:'网络 <code>%N%/%C%</code> 的<strong>最后一个可用主机</strong>是什么？',b_bc:'广播',b_mk:'掩码',b_bn:'二进制',b_gw:'网关',b_fh:'第一主机',b_lh:'最后主机',h_ip:'格式: X.X.X.X',h_mk:'格式: 255.255.255.0 或 /24',h_bn:'格式: 11000000.10101000.00000001.00000000',fb_ok:'正确！',fb_no:'错误！',fb_to:'时间到！',e_req:'必填项',e_email:'无效邮箱',e_uname:'最少3个字符',e_pshort:'最少6个字符',e_pmatch:'密码不匹配',e_exists:'用户已注册',e_login:'用户名或密码错误',t_saved:'资料已保存！',t_photo:'照片已更新！'}
-};
 var L='pt';
-function t(k){return(TX[L]&&TX[L][k])||TX.pt[k]||k;}
-function i18n(){
- document.querySelectorAll('[data-i]').forEach(function(el){
-  var k=el.getAttribute('data-i'),v=t(k);
-  if(v.indexOf('\n')>-1)el.innerHTML=v.replace(/\n/g,'<br>');else el.textContent=v;
- });
- document.querySelectorAll('.lp').forEach(function(el){el.classList.toggle('on',el.getAttribute('data-lang')===L);});
-}
-function slang(l){L=l;sup('language',l);i18n();toast(l.toUpperCase()+' ✓');}
 // THEME
 var CT='night';
 function stheme(th){
@@ -1691,7 +1682,6 @@ async function dologin(){
    },
    pz:profile.pz||1,
    theme:profile.theme||'night',
-   language:profile.language||'pt',
    best:0,
    score:0
   };
@@ -1791,7 +1781,6 @@ async function doreg(){
     pp:{x:0,y:0},
     pz:1,
     theme:'night',
-    language:'pt',
     best:0,
     score:0
    };
@@ -1834,12 +1823,12 @@ function dogoogle_confirm(){
  var us=gu(),ex=us.find(function(x){return x.googleUser&&x.email===e;});
  if(ex){login(ex);return;}
  var n=e.split('@')[0].replace(/[^a-zA-Z0-9_]/g,'').slice(0,18)||'GUser';
- var nu={username:n,email:e,password:'',googleUser:true,bio:'',title:'',turma:'',photo:'',pp:{x:0,y:0},pz:1,theme:'night',language:'pt',best:0,score:0};
+ var nu={username:n,email:e,password:'',googleUser:true,bio:'',title:'',turma:'',photo:'',pp:{x:0,y:0},pz:1,theme:'night', best:0,score:0};
  us.push(nu);su(us);login(nu);
 }
 function login(u){
- sc(u);L=u.language||'pt';
- stheme(u.theme||'night');i18n();uhdr();rhs();
+ sc(u);
+ stheme(u.theme||'night');uhdr();rhs();
  go('sh');ipart('hc');
 }
 async function logout(){
@@ -1859,42 +1848,145 @@ async function logout(){
   console.error('Erro ao sair:',err);
  }
 }
-(function(){
- try{
-  if(typeof emailjs!=='undefined')emailjs.init('YOUR_PUBLIC_KEY');
- }catch(e){}
-})();
-function dorec(){
- var e=document.getElementById('re2').value.trim();
- se('re2e','');
- if(!vem(e)){se('re2e',t('e_email'));return;}
- var btn=document.querySelector('#rf .btn.bp');
- var origTxt=btn?btn.textContent:'';
- if(btn){btn.disabled=true;btn.textContent='Enviando...';}
- function onOk(){
-  if(btn){btn.disabled=false;btn.textContent=origTxt;}
-  document.getElementById('rf').style.display='none';
-  var s=document.getElementById('rs');s.classList.add('on');
-  document.getElementById('rs').querySelector('.sico').textContent='✅';
-  var msg=document.getElementById('rs').querySelector('[data-i="rec_sent"]');
-  if(msg)msg.textContent='E-mail enviado! Verifique sua caixa de entrada.';
-  document.getElementById('rsto').textContent=e;
- }
- function onErr(err){
-  if(btn){btn.disabled=false;btn.textContent=origTxt;}
-  se('re2e','❌ Erro ao enviar. Verifique a configuração do EmailJS.');
-  console.error('EmailJS error:',err);
- }
- if(typeof emailjs!=='undefined'&&emailjs.send&&'YOUR_PUBLIC_KEY'!=='YOUR_PUBLIC_KEY'){
-  emailjs.send('YOUR_SERVICE_ID','YOUR_TEMPLATE_ID',{to_email:e,reset_link:'#',user_name:e})
-   .then(onOk,onErr);
- }else{
-  /* Modo demo: simula envio com delay */
-  setTimeout(function(){
-   onOk();
-   toast('⚠️ Demo: e-mail não enviado de verdade. Configure o EmailJS.');
-  },1200);
- }
+async function dorec(){
+  var e=document.getElementById('re2').value.trim();
+
+  se('re2e','');
+
+  if(!vem(e)){
+    se('re2e',t('e_email'));
+    return;
+  }
+
+  var btn=document.querySelector('#rf .btn.bp');
+  var origTxt=btn?btn.textContent:'';
+
+  if(btn){
+    btn.disabled=true;
+    btn.textContent='Enviando...';
+  }
+
+  try{
+
+    var {error}=await supabaseClient.auth.resetPasswordForEmail(e,{
+      redirectTo:window.location.origin+window.location.pathname
+    });
+
+    if(error){
+      console.error('Erro ao enviar recuperação:',error);
+
+      if(btn){
+        btn.disabled=false;
+        btn.textContent=origTxt;
+      }
+
+      se('re2e','Não foi possível enviar o e-mail de recuperação.');
+      return;
+    }
+
+    if(btn){
+      btn.disabled=false;
+      btn.textContent=origTxt;
+    }
+
+    document.getElementById('rf').style.display='none';
+
+    var s=document.getElementById('rs');
+    if(s)s.classList.add('on');
+
+    var ico=s?s.querySelector('.sico'):null;
+    if(ico)ico.textContent='✅';
+
+    var msg=s?s.querySelector('[]'):null;
+    if(msg)msg.textContent='E-mail enviado! Verifique sua caixa de entrada.';
+
+    var sto=document.getElementById('rsto');
+    if(sto)sto.textContent=e;
+
+  }catch(err){
+
+    console.error('Erro inesperado na recuperação:',err);
+
+    if(btn){
+      btn.disabled=false;
+      btn.textContent=origTxt;
+    }
+
+    se('re2e','Erro ao enviar o e-mail de recuperação.');
+  }
+}
+async function saveNewPassword(){
+
+  var p=document.getElementById('newpass').value;
+  var p2=document.getElementById('newpass2').value;
+
+  se('newpasse','');
+  se('newpass2e','');
+
+  if(p.length<6){
+    se('newpasse','A senha deve ter pelo menos 6 caracteres.');
+    return;
+  }
+
+  if(p!==p2){
+    se('newpass2e','As senhas não coincidem.');
+    return;
+  }
+
+  var btn=document.querySelector('#mreset .btn.bp');
+  var origTxt=btn?btn.textContent:'';
+
+  if(btn){
+    btn.disabled=true;
+    btn.textContent='SALVANDO...';
+  }
+
+  try{
+
+    var {data,error}=await supabaseClient.auth.updateUser({
+      password:p
+    });
+
+    if(error){
+      console.error('Erro ao atualizar senha:',error);
+
+      if(btn){
+        btn.disabled=false;
+        btn.textContent=origTxt;
+      }
+
+      se('newpasse','Não foi possível alterar a senha.');
+      return;
+    }
+
+    if(btn){
+      btn.disabled=false;
+      btn.textContent=origTxt;
+    }
+
+    document.getElementById('mreset').classList.remove('on');
+
+    document.getElementById('newpass').value='';
+    document.getElementById('newpass2').value='';
+
+    toast('Senha alterada com sucesso!','gd');
+
+    await supabaseClient.auth.signOut();
+
+    go('sa');
+    ipart('pc');
+
+  }catch(err){
+
+    console.error('Erro inesperado ao alterar senha:',err);
+
+    if(btn){
+      btn.disabled=false;
+      btn.textContent=origTxt;
+    }
+
+    se('newpasse','Erro ao alterar a senha.');
+  }
 }
 function om(id){document.getElementById(id).classList.add('on');}
 function cm(id){
@@ -1989,7 +2081,6 @@ async function savep(){
         pp_y:PP.y,
         pz:PZ,
         theme:CT||'night',
-        language:L||'pt'
       })
       .eq('id',u.id)
       .select()
@@ -2012,7 +2103,6 @@ async function savep(){
     };
     u.pz=updatedProfile.pz||1;
     u.theme=updatedProfile.theme||'night';
-    u.language=updatedProfile.language||'pt';
 
     sc(u);
 
@@ -4303,9 +4393,20 @@ document.addEventListener('keydown',function(e){
  if(e.key==='Enter'){var a=document.querySelector('.scr.on');if(a&&a.id==='sq')suba();}
  if(e.key==='Escape')document.querySelectorAll('.mbg.on').forEach(function(m){m.classList.remove('on');});
 });
-document.addEventListener('DOMContentLoaded',async function(){
-  i18n();
+supabaseClient.auth.onAuthStateChange(function(event,session){
 
+  if(event==='PASSWORD_RECOVERY'){
+
+    var modal=document.getElementById('mreset');
+
+    if(modal){
+      modal.classList.add('on');
+    }
+
+  }
+
+});
+document.addEventListener('DOMContentLoaded',async function(){
   try{
     var {data:{session},error}=await supabaseClient.auth.getSession();
 
@@ -4349,7 +4450,6 @@ document.addEventListener('DOMContentLoaded',async function(){
       },
       pz:profile.pz||1,
       theme:profile.theme||'night',
-      language:profile.language||'pt',
       best:0,
       score:0
     };
@@ -4360,9 +4460,7 @@ document.addEventListener('DOMContentLoaded',async function(){
     PP=nu.pp;
     PZ=nu.pz;
 
-    L=nu.language;
     stheme(nu.theme);
-    i18n();
     uhdr();
     rhs();
     go('sh');
@@ -4379,7 +4477,8 @@ window.stab=stab;window.sttab=sttab;window.eye=eye;window.om=om;window.dologin=d
 window.dogoogle=dogoogle;window.doreg=doreg;window.go=go;window.logout=logout;
 window.startq=startq;window.stopq=stopq;window.suba=suba;window.tpp=tpp;
 window.apurl=apurl;window.mp=mp;window.cfr=cfr;window.savep=savep;
-window.stheme=stheme;window.slang=slang;window.cm=cm;window.dorec=dorec;
+window.stheme=stheme;window.cm=cm;window.dorec=dorec;
+window.saveNewPassword=saveNewPassword;
 window.pwstr=pwstr;window.apfile=apfile;
 window.tacc=tacc;window.ctab=ctab;window.calc4=calc4;window.calc6=calc6;
 window.dogoogle_confirm=dogoogle_confirm;
@@ -4621,28 +4720,6 @@ window._showResetProgModal=_showResetProgModal;
 window._closeResetProgModal=_closeResetProgModal;
 window._confirmResetProg=_confirmResetProg;
 
-/* ===== LOGIN LANGUAGE SELECTOR ===== */
-function loginLang(lang){
- L=lang;
- ['pt','en','es'].forEach(function(l){
-  var b=document.getElementById('llbtn-'+l);
-  if(b)b.classList.toggle('on',l===lang);
- });
- /* Also sync the profile language pills */
- document.querySelectorAll('.lp').forEach(function(el){
-  el.classList.toggle('on',el.getAttribute('data-lang')===lang);
- });
- sup('language',lang);
- i18n();
-}
-window.loginLang=loginLang;
-/* Init login lang selector from saved preference */
-(function(){
- var saved=localStorage.getItem('nqp2_pref');
- var lang='pt';
- if(saved){try{var p=JSON.parse(saved);if(p&&p.language)lang=p.language;}catch(e){}}
- if(lang!=='pt')loginLang(lang);
-})();
 })();
 </script>
 
