@@ -3982,7 +3982,7 @@ async function _ensureRankingEntry(){
           pontuacao_maxima:QS.sc
         })
         .eq('user_id',u.id);
-
+h
       if(updateError){
         console.error('Erro ao atualizar ranking:',updateError);
       }
@@ -4574,38 +4574,76 @@ supabaseClient.auth.onAuthStateChange(function(event,session){
 
 });
 document.addEventListener('DOMContentLoaded',async function(){
-  try{
-    var {data:{session},error}=await supabaseClient.auth.getSession();
 
-    if(error){
-      console.error(error);
-      go('sa');
-      ipart('pc');
-      return;
+  try{
+
+    /* Aguarda a sessão do Supabase ficar disponível.
+       Isso ajuda principalmente no retorno do Google OAuth. */
+    var session=null;
+
+    for(var tentativa=0;tentativa<5;tentativa++){
+
+      var {data:sessionData,error:sessionError}=await supabaseClient.auth.getSession();
+
+      if(sessionError){
+        console.error('Erro ao recuperar sessão:',sessionError);
+        break;
+      }
+
+      session=sessionData&&sessionData.session;
+
+      if(session){
+        break;
+      }
+
+      await new Promise(function(resolve){
+        setTimeout(resolve,400);
+      });
     }
 
+    /* Se realmente não existe sessão, mostra o login. */
     if(!session){
       go('sa');
       ipart('pc');
       return;
     }
 
-    var {data:profile,error:profileError}=await supabaseClient
-      .from('profiles')
-      .select('*')
-      .eq('id',session.user.id)
-      .single();
+    /* O perfil pode levar alguns instantes para aparecer
+       depois da criação/autenticação da conta. */
+    var profile=null;
+    var profileError=null;
 
-    if(profileError){
-      console.error(profileError);
-      go('sa');
-      ipart('pc');
-      return;
+    for(var tentativaPerfil=0;tentativaPerfil<5;tentativaPerfil++){
+
+      var profileResult=await supabaseClient
+        .from('profiles')
+        .select('*')
+        .eq('id',session.user.id)
+        .maybeSingle();
+
+      profile=profileResult.data;
+      profileError=profileResult.error;
+
+      if(profile){
+        break;
+      }
+
+      if(profileError){
+        console.error('Erro ao carregar perfil:',profileError);
+      }
+
+      await new Promise(function(resolve){
+        setTimeout(resolve,500);
+      });
     }
+
+    /* Mesmo se o perfil ainda não estiver disponível,
+       não trata o usuário autenticado como deslogado. */
+    profile=profile||{};
 
     var nu={
       id:session.user.id,
-      username:profile.username||profile.name||'Usuário',
+      username:profile.username||profile.name||session.user.user_metadata?.name||session.user.email?.split('@')[0]||'Usuário',
       email:profile.email||session.user.email,
       bio:profile.bio||'',
       title:profile.title||'',
@@ -4630,14 +4668,19 @@ document.addEventListener('DOMContentLoaded',async function(){
     stheme(nu.theme);
     uhdr();
     rhs();
+
     go('sh');
     ipart('hc');
 
   }catch(err){
-    console.error(err);
+
+    console.error('Erro ao inicializar sessão:',err);
+
     go('sa');
     ipart('pc');
+
   }
+
 });
 // Expose functions to global scope for inline onclick handlers
 window.stab=stab;window.sttab=sttab;window.eye=eye;window.om=om;window.dologin=dologin;
