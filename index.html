@@ -698,6 +698,10 @@ const supabaseClient = window.supabase.createClient(
    <div class="hstat"><div class="hstat-v" id="hst-tot">0</div><div class="hstat-l">&#128202; Perguntas</div></div>
    <div class="hstat"><div class="hstat-v" id="hst-acc">0%</div><div class="hstat-l">&#9989; Acertos</div></div>
    <div class="hstat"><div class="hstat-v" id="hst-str">0</div><div class="hstat-l">&#9889; Sessões</div></div>
+   <div class="hstat" onclick="var u=gc();if(u&&u.id)openPlayerHistory(u.id)" style="cursor:pointer">
+    <div class="hstat-v" id="hst-resets">0</div>
+    <div class="hstat-l">↻ Resets</div>
+   </div>
   </div>
   <!-- MODO DE JOGO -->
   <div class="modesrow">
@@ -1109,9 +1113,9 @@ async function rkload(){
   /* Busca os 10 maiores recordes no Supabase */
   var {data:scores,error:scoresError}=await supabaseClient
    .from('scores')
-   .select('user_id,pontuacao_maxima')
+   .select('user_id,partidas,acertos,erros,pontuacao_maxima')
    .order('pontuacao_maxima',{ascending:false})
-   .limit(10);
+   .limit(20);
 
   if(scoresError){
    console.error('Erro ao carregar ranking:',scoresError);
@@ -1149,6 +1153,12 @@ async function rkload(){
 
   profiles=profiles||[];
 
+  var histories={};
+
+  for(var s of scores){
+    histories[s.user_id]=await _getProgressHistory(s.user_id);
+  }
+
   /* Junta score + perfil */
   var players=scores.map(function(s){
 
@@ -1158,11 +1168,18 @@ async function rkload(){
 
    return {
     id:s.user_id,
+    accuracy:(s.acertos||0)+((s.erros||0))>0
+      ? Math.round(((s.acertos||0)/((s.acertos||0)+(s.erros||0)))*100)
+      : 0,
     username:p?(p.username||p.name||'Usuário'):'Usuário',
     title:p?(p.title||''):'',
     turma:p?(p.turma||''):'',
     photo:p?(p.photo||''):'',
-    best:s.pontuacao_maxima||0
+    partidas:s.partidas||0,
+    acertos:s.acertos||0,
+    erros:s.erros||0,
+    best:s.pontuacao_maxima||0,
+    resets:histories[s.user_id]||[]
    };
 
   });
@@ -1248,8 +1265,12 @@ async function rkload(){
    html+='<div class="rk-bar-fill" style="width:'+barPct+'%;background:'+barColor+'"></div>';
    html+='</div>';
 
+   html+='<div style="display:flex;justify-content:space-between;align-items:center;width:100%;font-size:.62rem;color:var(--muted);padding:0 .1rem .15rem">';
+   html+='<span>✓ '+u.acertos+' acertos · ✕ '+u.erros+' erros · '+u.accuracy+'% · '+u.partidas+' partidas</span>';
+   html+='<button onclick="openPlayerHistory(\''+u.id+'\')" style="border:0;background:none;color:var(--ac);font:inherit;cursor:pointer;padding:0">↻ '+u.resets.length+' resets</button>';
    html+='</div>';
 
+   html+='</div>';
   });
 
   /* Mensagem da posição do usuário */
@@ -3838,12 +3859,12 @@ function shuffle(a){var arr=a.slice();for(var i=arr.length-1;i>0;i--){var j=Math
 var QB_ALL=shuffle(QB_CHOICE.concat(QB_WRITE));
 var QB_IDX=0;
 var QT=[
- {id:'bc',badge:function(){return t('b_bc');},text:function(n){return t('q_bc').replace('%N%',n.net).replace('%C%',n.cidr);},ans:function(n){return n.bc;},hint:function(){return t('h_ip');},chk:function(i,n){return nip(i)===n.bc;}},
- {id:'mk',badge:function(){return t('b_mk');},text:function(n){return t('q_mk').replace('%N%',n.net).replace('%C%',n.cidr);},ans:function(n){return n.mask+' (/'+n.cidr+')';},hint:function(){return t('h_mk');},chk:function(i,n){var s=i.trim().toLowerCase();return s===n.mask.toLowerCase()||s==='/'+n.cidr||s===String(n.cidr);}},
- {id:'bn',badge:function(){return t('b_bn');},text:function(n){return t('q_bn').replace('%N%',n.net);},ans:function(n){return n.bin;},hint:function(){return t('h_bn');},chk:function(i,n){var s=i.trim().replace(/\s+/g,'');return s.replace(/\./g,'')===n.bin.replace(/\./g,'')||s===n.bin;}},
- {id:'gw',badge:function(){return t('b_gw');},text:function(n){return t('q_gw').replace('%N%',n.net).replace('%C%',n.cidr);},ans:function(n){return n.gw;},hint:function(){return t('h_ip');},chk:function(i,n){return nip(i)===n.gw;}},
- {id:'fh',badge:function(){return t('b_fh');},text:function(n){return t('q_fh').replace('%N%',n.net).replace('%C%',n.cidr);},ans:function(n){return n.fh;},hint:function(){return t('h_ip');},chk:function(i,n){return nip(i)===n.fh;}},
- {id:'lh',badge:function(){return t('b_lh');},text:function(n){return t('q_lh').replace('%N%',n.net).replace('%C%',n.cidr);},ans:function(n){return n.lh;},hint:function(){return t('h_ip');},chk:function(i,n){return nip(i)===n.lh;}}
+ {id:'bc',badge:function(){return 'Broadcast';},text:function(n){return 'Qual é o endereço de Broadcast da rede '+n.net+'/'+n.cidr+'?';},ans:function(n){return n.bc;},hint:function(){return 'O Broadcast é o último endereço da rede.';},chk:function(i,n){return nip(i)===n.bc;}},
+ {id:'mk',badge:function(){return 'Máscara';},text:function(n){return 'Qual é a máscara de rede de '+n.net+'/'+n.cidr+'?';},ans:function(n){return n.mask+' (/'+n.cidr+')';},hint:function(){return 'Você pode responder usando a máscara ou o prefixo CIDR.';},chk:function(i,n){var s=i.trim().toLowerCase();return s===n.mask.toLowerCase()||s==='/'+n.cidr||s===String(n.cidr);}},
+ {id:'bn',badge:function(){return 'Binário';},text:function(n){return 'Converta o endereço de rede '+n.net+' para binário.';},ans:function(n){return n.bin;},hint:function(){return 'Converta cada octeto para 8 bits.';},chk:function(i,n){var s=i.trim().replace(/\s+/g,'');return s.replace(/\./g,'')===n.bin.replace(/\./g,'')||s===n.bin;}},
+ {id:'gw',badge:function(){return 'Gateway';},text:function(n){return 'Qual é o Gateway da rede '+n.net+'/'+n.cidr+'?';},ans:function(n){return n.gw;},hint:function(){return 'O Gateway usado pelo exercício é o primeiro endereço utilizável da rede.';},chk:function(i,n){return nip(i)===n.gw;}},
+ {id:'fh',badge:function(){return 'Primeiro Host';},text:function(n){return 'Qual é o primeiro endereço de host da rede '+n.net+'/'+n.cidr+'?';},ans:function(n){return n.fh;},hint:function(){return 'O primeiro host vem logo depois do endereço de rede.';},chk:function(i,n){return nip(i)===n.fh;}},
+ {id:'lh',badge:function(){return 'Último Host';},text:function(n){return 'Qual é o último endereço de host da rede '+n.net+'/'+n.cidr+'?';},ans:function(n){return n.lh;},hint:function(){return 'O último host fica imediatamente antes do Broadcast.';},chk:function(i,n){return nip(i)===n.lh;}}
 ];
 var QS={
  sc:0,qn:0,tot:0,hits:0,ts:60,tmax:60,ti:null,
@@ -3854,21 +3875,47 @@ function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()
 var _dbOrder=[];
 /* Classifica cada pergunta do QUIZ_DB como 'v4', 'v6' ou 'both' em runtime */
 function _classifyQ(q){
- var t=(q.q||'').toLowerCase();
- var v6kw=['ipv6','::','fe80','ff02','ff00','2001:','eui-64','slaac','dhcpv6',
-  'link-local','loopback ipv6','multicast','anycast','compressao','compressão',
-  'expansao','expansão','128 bits','128-bit','fc00','fd00','teredo','6to4',
-  'dual stack','tunelamento','unicast global','prefixo ipv6','grupos hex',
-  'grupos de 16','grupos de zeros','abreviacao','abreviação ipv6'];
- var v4kw=['ipv4','255.','192.168','10.0.','172.16','/24','/8','/16','/30',
-  'broadcast','mascara','máscara','subnetting','sub-rede','cidr','nat',
-  'gateway','127.0.0','classe a','classe b','classe c','octeto',
-  'rfc 1918','apipa','169.254','vlsm','supernetting'];
- var isV6=v6kw.some(function(k){return t.indexOf(k)>-1;});
- var isV4=v4kw.some(function(k){return t.indexOf(k)>-1;});
- if(isV6&&isV4)return 'both';
- if(isV6)return 'v6';
- return 'v4';
+  var t=(q.q||'').toLowerCase();
+
+  var v6kw=[
+    'ipv6','::','fe80','ff02','ff00','2001:',
+    'eui-64','slaac','dhcpv6','link-local',
+    'loopback ipv6','multicast','anycast',
+    '128 bits','128-bit','fc00','fd00',
+    'teredo','6to4','unicast global',
+    'prefixo ipv6','grupos hex','grupos de 16',
+    'grupos de zeros','abreviacao ipv6','abreviação ipv6'
+  ];
+
+  var v4kw=[
+    'ipv4','255.','192.168','10.0.','172.16',
+    '/24','/8','/16','/30','broadcast',
+    'subnetting','sub-rede','cidr','nat',
+    '127.0.0','classe a','classe b','classe c',
+    'octeto','rfc 1918','apipa','169.254',
+    'vlsm','supernetting'
+  ];
+
+  var hasIPv6=t.indexOf('ipv6')>-1;
+  var hasIPv4=t.indexOf('ipv4')>-1;
+
+  var isV6=v6kw.some(function(k){
+    return t.indexOf(k)>-1;
+  });
+
+  var isV4=v4kw.some(function(k){
+    return t.indexOf(k)>-1;
+  });
+
+  /* Só considera "both" quando os dois protocolos
+     estão realmente indicados na questão. */
+  if(hasIPv6&&hasIPv4)return 'both';
+
+  if(hasIPv6||isV6)return 'v6';
+
+  if(hasIPv4||isV4)return 'v4';
+
+  return 'v4';
 }
 /* Constrói _dbOrder filtrado pelo modo atual */
 function _buildDbOrder(mode){
@@ -3894,6 +3941,122 @@ function stopq(){
  clearInterval(QS.ti);
  document.getElementById('fov').classList.remove('on');
  if(QS.qn>0){showResult();}else{go('sh');}
+}
+async function _ensureRankingEntry(){
+  var u=gc();
+
+  if(!u || !u.id || QUIZ_MODE!=='both' || QS.sc<1){
+    return;
+  }
+
+  try{
+    var {data:row,error:selectError}=await supabaseClient
+      .from('scores')
+      .select('user_id,pontuacao_maxima')
+      .eq('user_id',u.id)
+      .maybeSingle();
+
+    if(selectError){
+      console.error('Erro ao verificar ranking:',selectError);
+      return;
+    }
+
+    if(!row){
+      var {error:insertError}=await supabaseClient
+        .from('scores')
+        .insert({
+          user_id:u.id,
+          partidas:0,
+          acertos:0,
+          erros:0,
+          pontuacao_maxima:QS.sc
+        });
+
+      if(insertError){
+        console.error('Erro ao inserir no ranking:',insertError);
+      }
+    }else if(QS.sc>(row.pontuacao_maxima||0)){
+      var {error:updateError}=await supabaseClient
+        .from('scores')
+        .update({
+          pontuacao_maxima:QS.sc
+        })
+        .eq('user_id',u.id);
+
+      if(updateError){
+        console.error('Erro ao atualizar ranking:',updateError);
+      }
+    }
+  }catch(err){
+    console.error('Erro ao garantir entrada no ranking:',err);
+  }
+}
+async function _getProgressHistory(userId){
+  if(!userId){
+    return [];
+  }
+
+  try{
+    var {data,error}=await supabaseClient
+      .from('progress_history')
+      .select('id,reset_number,partidas,acertos,erros,pontuacao_maxima,data_reset')
+      .eq('user_id',userId)
+      .order('reset_number',{ascending:false});
+
+    if(error){
+      console.error('Erro ao buscar histórico de progresso:',error);
+      return [];
+    }
+
+    return data||[];
+  }catch(err){
+    console.error('Erro ao consultar histórico de progresso:',err);
+    return [];
+  }
+}
+async function openPlayerHistory(userId){
+
+  var history=await _getProgressHistory(userId);
+
+  if(!history.length){
+    toast('Este jogador ainda não possui resets registrados.','ok');
+    return;
+  }
+
+  var old=document.getElementById('player-history-modal');
+  if(old)old.remove();
+
+  var html='';
+  html+='<div id="player-history-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;padding:1rem;z-index:30000">';
+  html+='<div style="background:var(--panel);border:1px solid var(--line);border-radius:18px;width:min(520px,100%);max-height:85vh;overflow:auto;padding:1.2rem">';
+  html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">';
+  html+='<div style="font-size:1rem;font-weight:800;color:var(--text)">Histórico de resets</div>';
+  html+='<button onclick="document.getElementById(\'player-history-modal\').remove()" style="border:0;background:none;color:var(--muted);font-size:1.2rem;cursor:pointer">✕</button>';
+  html+='</div>';
+
+  history.forEach(function(h){
+
+    var data=new Date(h.data_reset);
+    var dataFormatada=data.toLocaleDateString('pt-BR')+' às '+data.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+
+    html+='<div style="border:1px solid var(--line);border-radius:12px;padding:.85rem;margin-bottom:.7rem">';
+    html+='<div style="font-weight:800;color:var(--ac);margin-bottom:.5rem">↻ Reset #'+h.reset_number+'</div>';
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:.35rem;font-size:.72rem;color:var(--muted)">';
+    html+='<div>Partidas: <strong style="color:var(--text)">'+h.partidas+'</strong></div>';
+    html+='<div>Acertos: <strong style="color:var(--text)">'+h.acertos+'</strong></div>';
+    html+='<div>Erros: <strong style="color:var(--text)">'+h.erros+'</strong></div>';
+    html+='<div>Máximo: <strong style="color:var(--text)">'+h.pontuacao_maxima+'</strong></div>';
+    html+='</div>';
+    html+='<div style="font-size:.62rem;color:var(--muted);margin-top:.6rem">Resetado em '+dataFormatada+'</div>';
+    html+='</div>';
+
+  });
+
+  html+='</div>';
+  html+='</div>';
+
+  document.body.insertAdjacentHTML('beforeend',html);
+
 }
 async function _saveScore(isError){
  var u=gc();
@@ -4208,12 +4371,16 @@ async function sfb(tp,correctAns){
   /* ACERTOU: mostra feedback verde e avança */
   ov.classList.add('on');
   document.getElementById('fcor').textContent=correctAns||'';
-  fi.textContent='✓';ft.className='ft ok';ft.textContent=t('fb_ok');fp.style.display='';fp.textContent='+1';
+  fi.textContent='✓';ft.className='ft ok';ft.textContent='CORRETO!';fp.style.display='';fp.textContent='+1';
   if(typeof updateCombo==='function')updateCombo(true);
   if(typeof spawnConfetti==='function')spawnConfetti();
   var tot=parseInt(localStorage.getItem('nqp_tot')||'0')+1;
   var hits=parseInt(localStorage.getItem('nqp_hits')||'0')+1;
-  localStorage.setItem('nqp_tot',tot);localStorage.setItem('nqp_hits',hits);
+  localStorage.setItem('nqp_tot',tot);
+  localStorage.setItem('nqp_hits',hits);
+
+  await _ensureRankingEntry();
+
   document.getElementById('qsd').textContent='Score: '+QS.sc;
   document.getElementById('qsh').textContent='Score: '+QS.sc;
   setTimeout(function(){ov.classList.remove('on');nq();},2000);
@@ -4486,6 +4653,8 @@ window.selmode=selmode;window.sttab=sttab;
 function restartq(){startq();}
 window.subaMC=subaMC;window.showResult=showResult;
 window.restartq=restartq;
+window.openPlayerHistory=openPlayerHistory;
+window.gc=gc;
 
 /* ===== CANVAS PARTÍCULAS DE REDE ===== */
 (function(){
@@ -4638,6 +4807,9 @@ function updateHomeStats(){
  var e=function(id,v){var el=document.getElementById(id);if(el)el.textContent=v;};
  e('hst-best',best);e('hst-tot',tot);e('hst-acc',acc+'%');e('hst-str',sess);
  e('hsc',u.score||0);e('hbs',best);
+ _getProgressHistory(u.id).then(function(history){
+    e('hst-resets',history.length);
+ });
  var greet=document.getElementById('hgreet');
  if(greet)greet.textContent=getGreeting(u.name||'Estudante');
 }
@@ -4688,44 +4860,110 @@ function _closeResetProgModal(){
  if(m){m.style.display='none';}
 }
 async function _confirmResetProg(){
- _closeResetProgModal();
- /* Zera localStorage de progresso */
- localStorage.setItem('nqp_tot','0');
- localStorage.setItem('nqp_hits','0');
- localStorage.setItem('nqp_sess','0');
- /* Zera best/score no objeto do usuário logado */
- var u=gc();
- if(u){
-  u.best=0;u.score=0;
-  sc(u);
 
-  var {error:resetError}=await supabaseClient.from('scores').update({
-  partidas:0,
-  acertos:0,
-  erros:0,
-  pontuacao_maxima:0
-}).eq('user_id',u.id);
+  _closeResetProgModal();
 
-if(resetError){
-  console.error('Erro ao resetar scores:',resetError);
-}
-  /* Atualiza também no array global de usuários */
-  var us=gu();
-  var i=us.findIndex(function(x){return x.email===u.email;});
-  if(i>-1){us[i]=u;su(us);}
- }
- /* Atualiza displays na tela de perfil */
- if(typeof updateHomeStats==='function')updateHomeStats();
- if(typeof rhs==='function')rhs();
- /* Mensagem de sucesso */
- if(typeof toast==='function'){toast('\u2705 Progresso resetado!','ok');}
- else{
-  var t=document.createElement('div');
-  t.textContent='\u2705 Progresso resetado!';
-  t.style.cssText='position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#2d6a4f;color:#fff;padding:.6rem 1.4rem;border-radius:12px;font-size:.82rem;font-weight:700;z-index:30000;';
-  document.body.appendChild(t);
-  setTimeout(function(){t.remove();},2000);
- }
+  var u=gc();
+
+  if(u){
+
+    /* Busca as estatísticas atuais antes do reset */
+    var {data:currentScore,error:scoreError}=await supabaseClient
+      .from('scores')
+      .select('partidas,acertos,erros,pontuacao_maxima')
+      .eq('user_id',u.id)
+      .maybeSingle();
+
+    if(scoreError){
+      console.error('Erro ao buscar scores antes do reset:',scoreError);
+    }
+
+    /* Salva o ciclo atual no histórico */
+    if(currentScore){
+
+      var {data:lastHistory,error:historyError}=await supabaseClient
+        .from('progress_history')
+        .select('reset_number')
+        .eq('user_id',u.id)
+        .order('reset_number',{ascending:false})
+        .limit(1);
+
+      if(historyError){
+        console.error('Erro ao buscar histórico de resets:',historyError);
+      }
+
+      var nextReset=lastHistory&&lastHistory.length
+        ? (lastHistory[0].reset_number||0)+1
+        : 1;
+
+      var {error:historyInsertError}=await supabaseClient
+        .from('progress_history')
+        .insert({
+          user_id:u.id,
+          reset_number:nextReset,
+          partidas:currentScore.partidas||0,
+          acertos:currentScore.acertos||0,
+          erros:currentScore.erros||0,
+          pontuacao_maxima:currentScore.pontuacao_maxima||0,
+          data_reset:new Date().toISOString()
+        });
+
+      if(historyInsertError){
+        console.error('Erro ao salvar histórico do reset:',historyInsertError);
+      }
+    }
+
+    /* Zera localStorage de progresso */
+    localStorage.setItem('nqp_tot','0');
+    localStorage.setItem('nqp_hits','0');
+    localStorage.setItem('nqp_sess','0');
+
+    /* Zera best/score no objeto do usuário logado */
+    u.best=0;
+    u.score=0;
+    sc(u);
+
+    /* Zera estatísticas atuais no Supabase */
+    var {error:resetError}=await supabaseClient
+      .from('scores')
+      .update({
+        partidas:0,
+        acertos:0,
+        erros:0,
+        pontuacao_maxima:0
+      })
+      .eq('user_id',u.id);
+
+    if(resetError){
+      console.error('Erro ao resetar scores:',resetError);
+    }
+
+    /* Atualiza também no array global de usuários */
+    var us=gu();
+    var i=us.findIndex(function(x){
+      return x.email===u.email;
+    });
+
+    if(i>-1){
+      us[i]=u;
+      su(us);
+    }
+  }
+
+  /* Atualiza displays na tela de perfil */
+  if(typeof updateHomeStats==='function')updateHomeStats();
+  if(typeof rhs==='function')rhs();
+
+  /* Mensagem de sucesso */
+  if(typeof toast==='function'){
+    toast('✅ Progresso resetado!','ok');
+  }else{
+    var t=document.createElement('div');
+    t.textContent='✅ Progresso resetado!';
+    t.style.cssText='position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#2d6a4f;color:#fff;padding:.6rem 1.4rem;border-radius:12px;font-size:.82rem;font-weight:700;z-index:30000;';
+    document.body.appendChild(t);
+    setTimeout(function(){t.remove();},2000);
+  }
 }
 window._showResetProgModal=_showResetProgModal;
 window._closeResetProgModal=_closeResetProgModal;
