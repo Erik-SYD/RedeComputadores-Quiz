@@ -4687,7 +4687,7 @@ function _closeResetProgModal(){
  var m=document.getElementById('modal-reset-prog');
  if(m){m.style.display='none';}
 }
-function _confirmResetProg(){
+async function _confirmResetProg(){
  _closeResetProgModal();
  /* Zera localStorage de progresso */
  localStorage.setItem('nqp_tot','0');
@@ -4698,6 +4698,17 @@ function _confirmResetProg(){
  if(u){
   u.best=0;u.score=0;
   sc(u);
+
+  var {error:resetError}=await supabaseClient.from('scores').update({
+  partidas:0,
+  acertos:0,
+  erros:0,
+  pontuacao_maxima:0
+}).eq('user_id',u.id);
+
+if(resetError){
+  console.error('Erro ao resetar scores:',resetError);
+}
   /* Atualiza também no array global de usuários */
   var us=gu();
   var i=us.findIndex(function(x){return x.email===u.email;});
